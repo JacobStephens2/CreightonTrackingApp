@@ -28,7 +28,9 @@ const syncLimiter = rateLimit({
   message: { error: 'Too many requests, try again in a minute' },
 });
 
-app.use('/api/auth', authLimiter, authRoutes);
+app.post('/api/auth/register', authLimiter);
+app.post('/api/auth/login', authLimiter);
+app.use('/api/auth', authRoutes);
 app.use('/api/sync', syncLimiter, requireAuth, syncRoutes);
 
 app.listen(port, '127.0.0.1', () => {

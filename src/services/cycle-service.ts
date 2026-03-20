@@ -15,15 +15,17 @@ export const cycleService = {
   },
 
   /** Evaluate all observations and auto-detect cycle boundaries.
-   *  A new cycle starts when bleeding (H, M, L) occurs after non-bleeding days,
-   *  or when it's the very first observation. */
+   *  A new cycle starts when bleeding (H, M, L) occurs after at least 3
+   *  consecutive non-bleeding observations, or after a 14+ day gap since
+   *  the last bleeding observation (sparse entry). */
   async evaluateCycles(): Promise<void> {
     const allObs = await db.observations.orderBy('date').toArray();
     if (allObs.length === 0) return;
 
     const cycles: { startDate: string; endDate?: string }[] = [];
     let currentCycleStart: string | null = null;
-    let prevWasBleeding = false;
+    let consecutiveNonBleeding = 0;
+    let lastBleedingDate: string | null = null;
 
     for (const obs of allObs) {
       const isBleeding = !!obs.bleeding && ['H', 'M', 'L'].includes(obs.bleeding);
@@ -31,18 +33,32 @@ export const cycleService = {
       if (currentCycleStart === null) {
         // First observation starts first cycle
         currentCycleStart = obs.date;
-        prevWasBleeding = isBleeding;
+        if (isBleeding) {
+          lastBleedingDate = obs.date;
+          consecutiveNonBleeding = 0;
+        } else {
+          consecutiveNonBleeding = 1;
+        }
         continue;
       }
 
-      // New cycle if we see heavy/moderate/light bleeding after non-bleeding
-      if (isBleeding && !prevWasBleeding) {
-        // End previous cycle
+      const daysSinceLastBleeding = lastBleedingDate
+        ? daysBetween(lastBleedingDate, obs.date)
+        : Infinity;
+
+      // New cycle if bleeding after enough non-bleeding evidence
+      if (isBleeding && (consecutiveNonBleeding >= 3 || daysSinceLastBleeding >= 14)) {
         cycles.push({ startDate: currentCycleStart });
         currentCycleStart = obs.date;
+        consecutiveNonBleeding = 0;
       }
 
-      prevWasBleeding = isBleeding;
+      if (isBleeding) {
+        lastBleedingDate = obs.date;
+        consecutiveNonBleeding = 0;
+      } else {
+        consecutiveNonBleeding++;
+      }
     }
 
     // Push the last/current cycle

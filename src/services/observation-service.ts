@@ -2,6 +2,8 @@ import { db } from '../db/database';
 import type { Observation } from '../db/models';
 import { determineStamp } from '../utils/stamp-logic';
 import { cycleService } from './cycle-service';
+import { authService } from './auth-service';
+import { syncService } from './sync-service';
 
 export const observationService = {
   /** Save or update an observation for a given date */
@@ -21,6 +23,11 @@ export const observationService = {
 
     // Re-evaluate cycle boundaries
     await cycleService.evaluateCycles();
+
+    // Background sync if logged in
+    if (authService.state.loggedIn) {
+      syncService.upload().catch(() => {});
+    }
   },
 
   /** Get observation for a specific date */
@@ -53,6 +60,10 @@ export const observationService = {
   async delete(date: string): Promise<void> {
     await db.observations.where('date').equals(date).delete();
     await cycleService.evaluateCycles();
+
+    if (authService.state.loggedIn) {
+      syncService.upload().catch(() => {});
+    }
   },
 
   /** Recompute stamps for all observations */

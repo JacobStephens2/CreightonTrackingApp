@@ -31,19 +31,18 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     syncBtns.style.cssText = 'display:flex;flex-direction:column;gap:8px';
 
     const uploadBtn = document.createElement('button');
-    uploadBtn.className = 'btn btn-primary btn-block';
-    uploadBtn.textContent = 'Sync to Server';
+    uploadBtn.className = 'btn btn-secondary btn-block';
+    uploadBtn.textContent = 'Sync Now';
     uploadBtn.addEventListener('click', async () => {
       uploadBtn.disabled = true;
       uploadBtn.textContent = 'Syncing...';
       try {
         await syncService.upload();
-        alert('Data synced to server.');
         renderSettingsView(container);
       } catch (e) {
         alert((e as Error).message);
         uploadBtn.disabled = false;
-        uploadBtn.textContent = 'Sync to Server';
+        uploadBtn.textContent = 'Sync Now';
       }
     });
     syncBtns.appendChild(uploadBtn);

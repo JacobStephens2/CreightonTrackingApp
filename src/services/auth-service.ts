@@ -48,6 +48,10 @@ export const authService = {
     }
     const data = await res.json();
     this.state = { loggedIn: true, email: data.email, userId: data.id };
+
+    // Upload any existing local data to the new account
+    const { syncService } = await import('./sync-service');
+    await syncService.upload().catch(() => {});
   },
 
   async logout(): Promise<void> {

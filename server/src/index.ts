@@ -6,6 +6,7 @@ import { initSchema } from './db/schema.js';
 import { requireAuth } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import syncRoutes from './routes/sync.js';
+import { shareAuthRouter, shareViewHandler } from './routes/share.js';
 
 initSchema();
 
@@ -32,6 +33,8 @@ app.post('/api/auth/register', authLimiter);
 app.post('/api/auth/login', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/sync', syncLimiter, requireAuth, syncRoutes);
+app.get('/api/share/view/:token', syncLimiter, shareViewHandler);
+app.use('/api/share', syncLimiter, requireAuth, shareAuthRouter);
 
 app.listen(port, '127.0.0.1', () => {
   console.log(`Creighton API listening on 127.0.0.1:${port}`);

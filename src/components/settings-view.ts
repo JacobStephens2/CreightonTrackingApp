@@ -2,6 +2,7 @@ import { db } from '../db/database';
 import { exportService } from '../services/export-service';
 import { authService } from '../services/auth-service';
 import { syncService } from '../services/sync-service';
+import { shareService } from '../services/share-service';
 
 export async function renderSettingsView(container: HTMLElement): Promise<void> {
   container.innerHTML = '';
@@ -145,6 +146,84 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   }
 
   wrapper.appendChild(accountCard);
+
+  // Provider Sharing card (only when logged in)
+  if (authService.state.loggedIn) {
+    const shareCard = document.createElement('div');
+    shareCard.className = 'card';
+    shareCard.innerHTML = '<div class="section-label" style="margin-top:0">Provider Sharing</div>';
+
+    const shareContent = document.createElement('div');
+    shareContent.style.cssText = 'display:flex;flex-direction:column;gap:8px';
+
+    try {
+      const status = await shareService.getStatus();
+
+      if (status.active) {
+        const info = document.createElement('p');
+        info.style.cssText = 'font-size:0.8125rem;color:var(--text-secondary);margin:0';
+        info.textContent = 'Your provider can view your charts at this link. They will see your last synced data.';
+        shareContent.appendChild(info);
+
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.readOnly = true;
+        urlInput.value = status.url!;
+        urlInput.style.cssText = 'font-size:0.8125rem';
+        shareContent.appendChild(urlInput);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn btn-primary btn-block';
+        copyBtn.textContent = 'Copy Link';
+        copyBtn.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(status.url!);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy Link'; }, 2000);
+        });
+        shareContent.appendChild(copyBtn);
+
+        const revokeBtn = document.createElement('button');
+        revokeBtn.className = 'btn btn-danger btn-block';
+        revokeBtn.textContent = 'Revoke Link';
+        revokeBtn.addEventListener('click', async () => {
+          if (!confirm('Revoke this share link? Your provider will no longer be able to view your charts.')) return;
+          await shareService.revoke();
+          renderSettingsView(container);
+        });
+        shareContent.appendChild(revokeBtn);
+      } else {
+        const desc = document.createElement('p');
+        desc.style.cssText = 'font-size:0.8125rem;color:var(--text-secondary);margin:0';
+        desc.textContent = 'Generate a link to share your charts with your FertilityCare Practitioner. They will see a read-only view of your synced data.';
+        shareContent.appendChild(desc);
+
+        const generateBtn = document.createElement('button');
+        generateBtn.className = 'btn btn-primary btn-block';
+        generateBtn.textContent = 'Generate Share Link';
+        generateBtn.addEventListener('click', async () => {
+          generateBtn.disabled = true;
+          generateBtn.textContent = 'Generating...';
+          try {
+            await shareService.generate();
+            renderSettingsView(container);
+          } catch (e) {
+            alert((e as Error).message);
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate Share Link';
+          }
+        });
+        shareContent.appendChild(generateBtn);
+      }
+    } catch {
+      const err = document.createElement('p');
+      err.style.cssText = 'font-size:0.8125rem;color:#d32f2f;margin:0';
+      err.textContent = 'Could not load sharing status.';
+      shareContent.appendChild(err);
+    }
+
+    shareCard.appendChild(shareContent);
+    wrapper.appendChild(shareCard);
+  }
 
   // Default view
   const viewCard = document.createElement('div');

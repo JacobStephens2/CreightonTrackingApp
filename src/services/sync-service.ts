@@ -1,4 +1,5 @@
 import { db } from '../db/database';
+import { cycleService } from './cycle-service';
 
 export const syncService = {
   async upload(): Promise<void> {
@@ -49,6 +50,9 @@ export const syncService = {
         await db.settings.put({ ...data.settings, id: 1 });
       }
     });
+
+    // Re-evaluate cycles to fix cycleId references
+    await cycleService.evaluateCycles();
 
     localStorage.setItem('lastSyncTime', new Date().toISOString());
     return { observations: data.observations.length, cycles: data.cycles?.length || 0 };

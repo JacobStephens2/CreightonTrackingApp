@@ -1,7 +1,16 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        shared: resolve(__dirname, 'shared.html'),
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:3456',

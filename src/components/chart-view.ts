@@ -3,6 +3,7 @@ import { observationService } from '../services/observation-service';
 import { renderStamp } from './stamp';
 import { showObservationForm } from './observation-form';
 import { displayDate, addDays, daysBetween } from '../utils/date-utils';
+import { generateSampleData } from '../utils/sample-data';
 import type { Observation } from '../db/models';
 
 const CHART_COLUMNS = 35;
@@ -13,13 +14,7 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
   const cycles = await cycleService.getAll();
 
   if (cycles.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'empty-state';
-    empty.innerHTML = `
-      <h2>No Data Yet</h2>
-      <p>Tap the + button to record your first observation.</p>
-    `;
-    container.appendChild(empty);
+    renderSampleChart(container);
     return;
   }
 
@@ -165,6 +160,135 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
             showObservationForm(dateStr, undefined, () => renderChartView(container));
           });
           td.appendChild(emptyStamp);
+        }
+
+        // Peak day column highlight
+        if (cycle.peakDay) {
+          const peakDayNum = daysBetween(cycle.startDate, cycle.peakDay) + 1;
+          if (dayNum === peakDayNum) {
+            td.classList.add('chart-peak-col');
+          }
+        }
+      }
+
+      row.appendChild(td);
+    }
+
+    tbody.appendChild(row);
+  }
+
+  table.appendChild(tbody);
+  wrapper.appendChild(table);
+  container.appendChild(wrapper);
+}
+
+function renderSampleChart(container: HTMLElement): void {
+  // Banner
+  const banner = document.createElement('div');
+  banner.className = 'sample-banner';
+  banner.innerHTML = `
+    <strong>Sample Chart</strong>
+    <p>This is an example of what your chart will look like. Tap the + button to record your first observation and start tracking.</p>
+  `;
+  container.appendChild(banner);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  const legendItems = [
+    { color: 'green', label: 'Dry / Infertile' },
+    { color: 'red', label: 'Bleeding' },
+    { color: 'white', label: 'Fertile (Mucus)' },
+    { color: 'yellow', label: 'BIP' },
+  ];
+  for (const item of legendItems) {
+    const li = document.createElement('div');
+    li.className = 'legend-item';
+    li.innerHTML = `<span class="legend-dot legend-dot-${item.color}"></span>${item.label}`;
+    legend.appendChild(li);
+  }
+  container.appendChild(legend);
+
+  const { cycles, observationsByCycle } = generateSampleData();
+
+  // Chart table
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chart-container';
+
+  const table = document.createElement('table');
+  table.className = 'chart-table';
+  table.style.opacity = '0.7';
+
+  // Header row
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  headerRow.className = 'chart-header';
+  const thCycle = document.createElement('th');
+  thCycle.textContent = 'Cycle';
+  headerRow.appendChild(thCycle);
+  for (let i = 1; i <= CHART_COLUMNS; i++) {
+    const th = document.createElement('th');
+    th.textContent = String(i);
+    headerRow.appendChild(th);
+  }
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Cycle rows (newest first)
+  const tbody = document.createElement('tbody');
+  const sortedCycles = [...cycles].reverse();
+
+  for (let i = 0; i < sortedCycles.length; i++) {
+    const cycle = sortedCycles[i];
+    const cycleNumber = cycles.length - i;
+    const row = document.createElement('tr');
+    row.className = 'cycle-row';
+
+    // Cycle label
+    const tdLabel = document.createElement('td');
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'cycle-label';
+    const numSpan = document.createElement('span');
+    numSpan.className = 'cycle-label-num';
+    numSpan.textContent = `#${cycleNumber}`;
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'cycle-label-date';
+    dateSpan.textContent = displayDate(cycle.startDate);
+    labelDiv.appendChild(numSpan);
+    labelDiv.appendChild(dateSpan);
+    if (cycle.length) {
+      const lenSpan = document.createElement('span');
+      lenSpan.className = 'cycle-label-len';
+      lenSpan.textContent = `${cycle.length}d`;
+      labelDiv.appendChild(lenSpan);
+    }
+    tdLabel.appendChild(labelDiv);
+    row.appendChild(tdLabel);
+
+    // Get observations for this cycle
+    const observations = observationsByCycle.get(cycle.id!) ?? [];
+    const obsByDay = new Map<number, Observation>();
+    for (const obs of observations) {
+      const dayNum = daysBetween(cycle.startDate, obs.date) + 1;
+      obsByDay.set(dayNum, obs);
+    }
+
+    const totalDays = cycle.length ?? observations.length;
+
+    for (let dayNum = 1; dayNum <= CHART_COLUMNS; dayNum++) {
+      const td = document.createElement('td');
+
+      if (dayNum > totalDays && cycle.endDate) {
+        td.className = 'chart-empty';
+      } else {
+        const obs = obsByDay.get(dayNum);
+
+        if (obs) {
+          const stampEl = renderStamp(obs, {
+            showDay: dayNum,
+            showCode: true,
+          });
+          td.appendChild(stampEl);
         }
 
         // Peak day column highlight

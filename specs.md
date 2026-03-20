@@ -40,3 +40,6 @@ There should be links to https://www.fertilitycare.org/ and https://saintpaulvi.
 
 # New Observations
 When a user is inputting a new observation, they should be able to choose a date for the observation. The default date should be today.
+
+# Sample Chart
+The initial app view should have a sample chart to show people what to expect, indicating to them that this is a sample chart, and after they enter their first observation the sample chart no longer displays.

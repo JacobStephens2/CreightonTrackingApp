@@ -29,11 +29,9 @@ Last updated: 2026-03-20
 
 ## Infrastructure
 
-- Apache vhost: `/etc/apache2/sites-available/creighton.stephens.page-le-ssl.conf`
-- Systemd service: `/etc/systemd/system/creighton-api.service`
-- Web root: `/var/www/creighton.stephens.page/`
-- Source: `/home/jacob/CreightonTrackingApp/`
-- Database: `/home/jacob/CreightonTrackingApp/server/data/creighton.db`
+- Apache reverse proxy with Let's Encrypt SSL
+- Express API running as a systemd service
+- SQLite database in `server/data/`
 - GitHub: https://github.com/JacobStephens2/CreightonTrackingApp
 
 ## Known Issues / Quirks Fixed
@@ -51,12 +49,10 @@ Last updated: 2026-03-20
 
 ```bash
 # Frontend
-cd /home/jacob/CreightonTrackingApp
 npm run build
-sudo rm -rf /var/www/creighton.stephens.page/*
-sudo cp -r dist/* /var/www/creighton.stephens.page/
+# Copy dist/ to web root
 
 # Backend
 cd server && npm run build
-sudo systemctl restart creighton-api
+# Restart the API service
 ```

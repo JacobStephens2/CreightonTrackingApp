@@ -1,12 +1,151 @@
 import { db } from '../db/database';
 import { exportService } from '../services/export-service';
+import { authService } from '../services/auth-service';
+import { syncService } from '../services/sync-service';
 
 export async function renderSettingsView(container: HTMLElement): Promise<void> {
   container.innerHTML = '';
 
   const settings = (await db.settings.get(1)) ?? { id: 1, defaultView: 'chart' as const };
+  await authService.checkAuth();
 
   const wrapper = document.createElement('div');
+
+  // Account & Sync card
+  const accountCard = document.createElement('div');
+  accountCard.className = 'card';
+  accountCard.innerHTML = '<div class="section-label" style="margin-top:0">Account & Sync</div>';
+
+  if (authService.state.loggedIn) {
+    const lastSync = syncService.getLastSyncTime();
+    const lastSyncText = lastSync ? new Date(lastSync).toLocaleString() : 'Never';
+
+    const info = document.createElement('div');
+    info.innerHTML = `
+      <p style="font-size:0.875rem;margin-bottom:4px">Signed in as <strong>${authService.state.email}</strong></p>
+      <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:12px">Last synced: ${lastSyncText}</p>
+    `;
+    accountCard.appendChild(info);
+
+    const syncBtns = document.createElement('div');
+    syncBtns.style.cssText = 'display:flex;flex-direction:column;gap:8px';
+
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'btn btn-primary btn-block';
+    uploadBtn.textContent = 'Sync to Server';
+    uploadBtn.addEventListener('click', async () => {
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Syncing...';
+      try {
+        await syncService.upload();
+        alert('Data synced to server.');
+        renderSettingsView(container);
+      } catch (e) {
+        alert((e as Error).message);
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Sync to Server';
+      }
+    });
+    syncBtns.appendChild(uploadBtn);
+
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'btn btn-secondary btn-block';
+    downloadBtn.textContent = 'Download from Server';
+    downloadBtn.addEventListener('click', async () => {
+      if (!confirm('This will replace all local data with the server copy. Continue?')) return;
+      downloadBtn.disabled = true;
+      downloadBtn.textContent = 'Downloading...';
+      try {
+        const result = await syncService.download();
+        alert(`Downloaded ${result.cycles} cycles and ${result.observations} observations.`);
+        renderSettingsView(container);
+      } catch (e) {
+        alert((e as Error).message);
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = 'Download from Server';
+      }
+    });
+    syncBtns.appendChild(downloadBtn);
+
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'btn btn-secondary btn-block';
+    logoutBtn.textContent = 'Sign Out';
+    logoutBtn.addEventListener('click', async () => {
+      await authService.logout();
+      renderSettingsView(container);
+    });
+    syncBtns.appendChild(logoutBtn);
+
+    accountCard.appendChild(syncBtns);
+  } else {
+    const desc = document.createElement('p');
+    desc.style.cssText = 'font-size:0.8125rem;color:var(--text-secondary);margin-bottom:12px';
+    desc.textContent = 'Sign in to back up your data to the server and access it across devices. Your data always stays on your device too.';
+    accountCard.appendChild(desc);
+
+    const form = document.createElement('div');
+    form.style.cssText = 'display:flex;flex-direction:column;gap:8px';
+
+    const emailInput = document.createElement('input');
+    emailInput.type = 'email';
+    emailInput.placeholder = 'Email';
+    emailInput.autocomplete = 'email';
+    form.appendChild(emailInput);
+
+    const passwordInput = document.createElement('input');
+    passwordInput.type = 'password';
+    passwordInput.placeholder = 'Password (min 8 characters)';
+    passwordInput.autocomplete = 'current-password';
+    form.appendChild(passwordInput);
+
+    const errorMsg = document.createElement('p');
+    errorMsg.style.cssText = 'font-size:0.8125rem;color:#d32f2f;margin:0;display:none';
+    form.appendChild(errorMsg);
+
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:8px';
+
+    const loginBtn = document.createElement('button');
+    loginBtn.className = 'btn btn-primary';
+    loginBtn.style.flex = '1';
+    loginBtn.textContent = 'Sign In';
+    loginBtn.addEventListener('click', async () => {
+      errorMsg.style.display = 'none';
+      loginBtn.disabled = true;
+      try {
+        await authService.login(emailInput.value, passwordInput.value);
+        renderSettingsView(container);
+      } catch (e) {
+        errorMsg.textContent = (e as Error).message;
+        errorMsg.style.display = 'block';
+        loginBtn.disabled = false;
+      }
+    });
+    btnRow.appendChild(loginBtn);
+
+    const registerBtn = document.createElement('button');
+    registerBtn.className = 'btn btn-secondary';
+    registerBtn.style.flex = '1';
+    registerBtn.textContent = 'Create Account';
+    registerBtn.addEventListener('click', async () => {
+      errorMsg.style.display = 'none';
+      registerBtn.disabled = true;
+      try {
+        await authService.register(emailInput.value, passwordInput.value);
+        renderSettingsView(container);
+      } catch (e) {
+        errorMsg.textContent = (e as Error).message;
+        errorMsg.style.display = 'block';
+        registerBtn.disabled = false;
+      }
+    });
+    btnRow.appendChild(registerBtn);
+
+    form.appendChild(btnRow);
+    accountCard.appendChild(form);
+  }
+
+  wrapper.appendChild(accountCard);
 
   // Default view
   const viewCard = document.createElement('div');
@@ -121,7 +260,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   disclaimer.textContent =
     'This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner. ' +
     'The Creighton Model FertilityCare System should be learned through proper instruction. ' +
-    'All data is stored locally on your device and is never sent to any server.';
+    'All data is stored locally on your device. If you sign in, your data can also be backed up to our server for cross-device access.';
   wrapper.appendChild(disclaimer);
 
   // Version

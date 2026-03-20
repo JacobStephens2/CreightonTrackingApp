@@ -2,6 +2,11 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3456',
+    },
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -20,19 +25,19 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: 'icons/icon-192x192.svg',
+            src: 'app-icons/icon-192x192.png',
             sizes: '192x192',
-            type: 'image/svg+xml',
+            type: 'image/png',
           },
           {
-            src: 'icons/icon-512x512.svg',
+            src: 'app-icons/icon-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
           },
           {
-            src: 'icons/maskable-icon-512x512.svg',
+            src: 'app-icons/maskable-icon-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'maskable',
           },
         ],

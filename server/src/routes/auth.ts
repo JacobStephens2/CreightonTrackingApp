@@ -8,8 +8,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 router.post('/register', async (req: AuthRequest, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, firstName } = req.body;
 
+    if (!firstName || !firstName.trim()) {
+      res.status(400).json({ error: 'First name is required' });
+      return;
+    }
     if (!email || !EMAIL_RE.test(email)) {
       res.status(400).json({ error: 'Valid email is required' });
       return;
@@ -25,12 +29,13 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
       return;
     }
 
+    const trimmedName = firstName.trim();
     const hash = await bcrypt.hash(password, 12);
-    const result = db.prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)').run(email.toLowerCase(), hash);
+    const result = db.prepare('INSERT INTO users (email, first_name, password_hash) VALUES (?, ?, ?)').run(email.toLowerCase(), trimmedName, hash);
 
-    const token = signToken({ userId: result.lastInsertRowid as number, email: email.toLowerCase() });
+    const token = signToken({ userId: result.lastInsertRowid as number, email: email.toLowerCase(), firstName: trimmedName });
     setTokenCookie(res, token);
-    res.status(201).json({ id: result.lastInsertRowid, email: email.toLowerCase() });
+    res.status(201).json({ id: result.lastInsertRowid, email: email.toLowerCase(), firstName: trimmedName });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Registration failed' });
@@ -46,8 +51,8 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const user = db.prepare('SELECT id, email, password_hash FROM users WHERE email = ?').get(email.toLowerCase()) as
-      | { id: number; email: string; password_hash: string }
+    const user = db.prepare('SELECT id, email, first_name, password_hash FROM users WHERE email = ?').get(email.toLowerCase()) as
+      | { id: number; email: string; first_name: string; password_hash: string }
       | undefined;
 
     if (!user) {
@@ -61,9 +66,9 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const token = signToken({ userId: user.id, email: user.email });
+    const token = signToken({ userId: user.id, email: user.email, firstName: user.first_name });
     setTokenCookie(res, token);
-    res.json({ id: user.id, email: user.email });
+    res.json({ id: user.id, email: user.email, firstName: user.first_name });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -84,7 +89,7 @@ router.get('/me', requireAuth, (req: AuthRequest, res: Response) => {
     res.status(401).json({ error: 'Not authenticated' });
     return;
   }
-  res.json({ id: req.user.userId, email: req.user.email });
+  res.json({ id: req.user.userId, email: req.user.email, firstName: req.user.firstName });
 });
 
 export default router;

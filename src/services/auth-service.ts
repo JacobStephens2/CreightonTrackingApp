@@ -1,6 +1,7 @@
 export interface AuthState {
   loggedIn: boolean;
   email?: string;
+  firstName?: string;
   userId?: number;
 }
 
@@ -12,7 +13,7 @@ export const authService = {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const data = await res.json();
-        this.state = { loggedIn: true, email: data.email, userId: data.id };
+        this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
       } else {
         this.state = { loggedIn: false };
       }
@@ -33,21 +34,21 @@ export const authService = {
       throw new Error(data.error || 'Login failed');
     }
     const data = await res.json();
-    this.state = { loggedIn: true, email: data.email, userId: data.id };
+    this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
   },
 
-  async register(email: string, password: string): Promise<void> {
+  async register(firstName: string, email: string, password: string): Promise<void> {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ firstName, email, password }),
     });
     if (!res.ok) {
       const data = await res.json();
       throw new Error(data.error || 'Registration failed');
     }
     const data = await res.json();
-    this.state = { loggedIn: true, email: data.email, userId: data.id };
+    this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
 
     // Upload any existing local data to the new account
     const { syncService } = await import('./sync-service');

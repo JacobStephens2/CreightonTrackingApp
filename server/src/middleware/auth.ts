@@ -6,6 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 export interface AuthPayload {
   userId: number;
   email: string;
+  firstName: string;
 }
 
 export interface AuthRequest extends Request {

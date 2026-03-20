@@ -28,7 +28,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
 
     const info = document.createElement('div');
     info.innerHTML = `
-      <p style="font-size:0.875rem;margin-bottom:4px">Signed in as <strong>${authService.state.email}</strong></p>
+      <p style="font-size:0.875rem;margin-bottom:4px">Signed in as <strong>${authService.state.firstName || authService.state.email}</strong></p>
       <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:12px">Last synced: ${lastSyncText}</p>
     `;
     accountCard.appendChild(info);
@@ -91,6 +91,12 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     const form = document.createElement('div');
     form.style.cssText = 'display:flex;flex-direction:column;gap:8px';
 
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'First name';
+    nameInput.autocomplete = 'given-name';
+    form.appendChild(nameInput);
+
     const emailInput = document.createElement('input');
     emailInput.type = 'email';
     emailInput.placeholder = 'Email';
@@ -136,7 +142,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       errorMsg.style.display = 'none';
       registerBtn.disabled = true;
       try {
-        await authService.register(emailInput.value, passwordInput.value);
+        await authService.register(nameInput.value, emailInput.value, passwordInput.value);
         renderSettingsView(container);
       } catch (e) {
         errorMsg.textContent = (e as Error).message;

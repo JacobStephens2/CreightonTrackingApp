@@ -5,6 +5,7 @@ export function initSchema(): void {
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
+      first_name TEXT NOT NULL DEFAULT '',
       password_hash TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -26,4 +27,10 @@ export function initSchema(): void {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
+
+  // Migrations
+  const cols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+  if (!cols.some(c => c.name === 'first_name')) {
+    db.exec("ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT ''");
+  }
 }

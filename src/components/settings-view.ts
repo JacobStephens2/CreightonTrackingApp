@@ -4,11 +4,16 @@ import { authService } from '../services/auth-service';
 import { syncService } from '../services/sync-service';
 import { shareService } from '../services/share-service';
 
+let renderGeneration = 0;
+
 export async function renderSettingsView(container: HTMLElement): Promise<void> {
+  const thisRender = ++renderGeneration;
   container.innerHTML = '';
 
   const settings = (await db.settings.get(1)) ?? { id: 1, defaultView: 'chart' as const };
+  if (thisRender !== renderGeneration) return;
   await authService.checkAuth();
+  if (thisRender !== renderGeneration) return;
 
   const wrapper = document.createElement('div');
 
@@ -158,6 +163,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
 
     try {
       const status = await shareService.getStatus();
+      if (thisRender !== renderGeneration) return;
 
       if (status.active) {
         const info = document.createElement('p');
@@ -331,6 +337,18 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
 
   dataCard.appendChild(btnGroup);
   wrapper.appendChild(dataCard);
+
+  // Learn More links
+  const linksCard = document.createElement('div');
+  linksCard.className = 'card';
+  linksCard.innerHTML = `
+    <div class="section-label" style="margin-top:0">Learn More</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <a href="https://www.fertilitycare.org/" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">FertilityCare.org</a>
+      <a href="https://saintpaulvi.com/" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Saint Paul VI Institute</a>
+    </div>
+  `;
+  wrapper.appendChild(linksCard);
 
   // Disclaimer
   const disclaimer = document.createElement('div');

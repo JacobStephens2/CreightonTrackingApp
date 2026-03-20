@@ -186,5 +186,11 @@ export function renderSharedChartView(container: HTMLElement, data: SharedData):
     'This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner.';
   content.appendChild(disclaimer);
 
+  // Link to main site
+  const link = document.createElement('p');
+  link.style.cssText = 'text-align:center;margin-top:16px';
+  link.innerHTML = '<a href="https://creighton.stephens.page/" style="color:var(--primary);font-size:0.875rem">Start tracking with Creighton Tracker</a>';
+  content.appendChild(link);
+
   container.appendChild(content);
 }

@@ -1,0 +1,162 @@
+/* Observation form styles */
+.obs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.obs-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.obs-form-header h2 {
+  font-size: 1.125rem;
+}
+
+.obs-form-close {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+}
+
+.obs-form-close:active {
+  background: var(--bg-secondary);
+}
+
+/* Date display */
+.obs-form-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+/* Preview area */
+.obs-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}
+
+.obs-preview-code {
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* Toggle group within form */
+.obs-form .toggle-group {
+  margin-bottom: 4px;
+}
+
+/* Intercourse toggle */
+.intercourse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.intercourse-toggle label {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+/* Checkbox styled as toggle switch */
+.switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  inset: 0;
+  background: #BDBDBD;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.switch-slider::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.switch input:checked + .switch-slider {
+  background: var(--accent);
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(20px);
+}
+
+/* Form actions */
+.obs-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.obs-form-actions .btn {
+  flex: 1;
+}
+
+/* Notes */
+.obs-form textarea {
+  margin-top: 4px;
+}
+
+/* Peak day manual toggle */
+.peak-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.peak-toggle-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.peak-toggle-label span:first-child {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.peak-toggle-label span:last-child {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}

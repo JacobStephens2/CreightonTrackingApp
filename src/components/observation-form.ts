@@ -1,0 +1,313 @@
+import type { Observation, BleedingCode, MucusStretchCode, MucusCharacteristic, FrequencyCode } from '../db/models';
+import { BLEEDING_LABELS, MUCUS_STRETCH_LABELS, MUCUS_CHAR_LABELS, FREQUENCY_LABELS, buildObservationCode } from '../utils/creighton-codes';
+import { displayDate, dayOfWeek } from '../utils/date-utils';
+import { determineStamp } from '../utils/stamp-logic';
+import { renderStamp } from './stamp';
+import { observationService } from '../services/observation-service';
+
+interface FormState {
+  date: string;
+  bleeding?: BleedingCode;
+  mucusStretch?: MucusStretchCode;
+  mucusCharacteristics: MucusCharacteristic[];
+  frequency?: FrequencyCode;
+  isPeakDay: boolean;
+  intercourse: boolean;
+  notes: string;
+}
+
+export function showObservationForm(
+  date: string,
+  existing?: Observation,
+  onSave?: () => void
+): void {
+  const state: FormState = {
+    date,
+    bleeding: existing?.bleeding,
+    mucusStretch: existing?.mucusStretch,
+    mucusCharacteristics: existing?.mucusCharacteristics ? [...existing.mucusCharacteristics] : [],
+    frequency: existing?.frequency,
+    isPeakDay: existing?.isPeakDay ?? false,
+    intercourse: existing?.intercourse ?? false,
+    notes: existing?.notes ?? '',
+  };
+
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+
+  function render() {
+    modal.innerHTML = '';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'obs-form-header';
+    const title = document.createElement('h2');
+    title.textContent = existing ? 'Edit Observation' : 'New Observation';
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'obs-form-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', () => overlay.remove());
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    modal.appendChild(header);
+
+    // Date
+    const dateEl = document.createElement('div');
+    dateEl.className = 'obs-form-date';
+    dateEl.textContent = `${dayOfWeek(date)}, ${displayDate(date)} ${date.slice(0, 4)}`;
+    modal.appendChild(dateEl);
+
+    // Preview
+    const preview = document.createElement('div');
+    preview.className = 'obs-preview';
+    const previewObs: Observation = {
+      date: state.date,
+      bleeding: state.bleeding,
+      mucusStretch: state.mucusStretch,
+      mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
+      frequency: state.frequency,
+      isPeakDay: state.isPeakDay,
+      intercourse: state.intercourse,
+      stamp: determineStamp({
+        date: state.date,
+        bleeding: state.bleeding,
+        mucusStretch: state.mucusStretch,
+        mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
+        isPeakDay: state.isPeakDay,
+      }),
+    };
+    preview.appendChild(renderStamp(previewObs, { large: true, showCode: false }));
+    const codeEl = document.createElement('span');
+    codeEl.className = 'obs-preview-code';
+    codeEl.textContent = buildObservationCode(
+      state.bleeding,
+      state.mucusStretch,
+      state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
+      state.frequency
+    );
+    preview.appendChild(codeEl);
+    modal.appendChild(preview);
+
+    const form = document.createElement('div');
+    form.className = 'obs-form';
+
+    // Bleeding section
+    form.appendChild(sectionLabel('Bleeding'));
+    form.appendChild(
+      toggleGroup(
+        Object.entries(BLEEDING_LABELS).map(([code, label]) => ({
+          value: code,
+          label: `${code} - ${label}`,
+          active: state.bleeding === code,
+        })),
+        (val) => {
+          state.bleeding = state.bleeding === val ? undefined : (val as BleedingCode);
+          render();
+        },
+        true
+      )
+    );
+
+    // Mucus stretch
+    form.appendChild(sectionLabel('Mucus Observation'));
+    form.appendChild(
+      toggleGroup(
+        Object.entries(MUCUS_STRETCH_LABELS).map(([code, label]) => ({
+          value: code,
+          label: `${code} - ${label}`,
+          active: state.mucusStretch === code,
+        })),
+        (val) => {
+          state.mucusStretch = state.mucusStretch === val ? undefined : (val as MucusStretchCode);
+          render();
+        },
+        true
+      )
+    );
+
+    // Mucus characteristics (only if mucus > 0)
+    if (state.mucusStretch && state.mucusStretch !== '0') {
+      form.appendChild(sectionLabel('Mucus Characteristics'));
+      form.appendChild(
+        toggleGroup(
+          Object.entries(MUCUS_CHAR_LABELS).map(([code, label]) => ({
+            value: code,
+            label: `${code} - ${label}`,
+            active: state.mucusCharacteristics.includes(code as MucusCharacteristic),
+          })),
+          (val) => {
+            const char = val as MucusCharacteristic;
+            const idx = state.mucusCharacteristics.indexOf(char);
+            if (idx >= 0) {
+              state.mucusCharacteristics.splice(idx, 1);
+            } else {
+              state.mucusCharacteristics.push(char);
+            }
+            render();
+          },
+          false // multi-select
+        )
+      );
+    }
+
+    // Frequency
+    form.appendChild(sectionLabel('Frequency'));
+    form.appendChild(
+      toggleGroup(
+        Object.entries(FREQUENCY_LABELS).map(([code, label]) => ({
+          value: code,
+          label,
+          active: state.frequency === code,
+        })),
+        (val) => {
+          state.frequency = state.frequency === val ? undefined : (val as FrequencyCode);
+          render();
+        },
+        true
+      )
+    );
+
+    // Peak day toggle
+    const peakSection = document.createElement('div');
+    peakSection.className = 'peak-toggle';
+    const peakLabel = document.createElement('div');
+    peakLabel.className = 'peak-toggle-label';
+    peakLabel.innerHTML = '<span>Peak Day</span><span>Mark as the last day of peak-type mucus</span>';
+    peakSection.appendChild(peakLabel);
+    peakSection.appendChild(createSwitch(state.isPeakDay, (v) => {
+      state.isPeakDay = v;
+      render();
+    }));
+    form.appendChild(peakSection);
+
+    // Intercourse toggle
+    const icSection = document.createElement('div');
+    icSection.className = 'intercourse-toggle';
+    icSection.appendChild(createSwitch(state.intercourse, (v) => {
+      state.intercourse = v;
+      render();
+    }));
+    const icLabel = document.createElement('label');
+    icLabel.textContent = 'Intercourse';
+    icSection.appendChild(icLabel);
+    form.appendChild(icSection);
+
+    // Notes
+    form.appendChild(sectionLabel('Notes'));
+    const notesEl = document.createElement('textarea');
+    notesEl.placeholder = 'Optional notes...';
+    notesEl.value = state.notes;
+    notesEl.addEventListener('input', (e) => {
+      state.notes = (e.target as HTMLTextAreaElement).value;
+    });
+    form.appendChild(notesEl);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'obs-form-actions';
+
+    if (existing) {
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn btn-danger';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.addEventListener('click', async () => {
+        await observationService.delete(date);
+        overlay.remove();
+        onSave?.();
+      });
+      actions.appendChild(deleteBtn);
+    }
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn btn-primary';
+    saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', async () => {
+      const obs: Observation = {
+        ...(existing ?? {}),
+        date: state.date,
+        bleeding: state.bleeding,
+        mucusStretch: state.mucusStretch,
+        mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
+        frequency: state.frequency,
+        isPeakDay: state.isPeakDay,
+        intercourse: state.intercourse,
+        notes: state.notes || undefined,
+        stamp: determineStamp({
+          date: state.date,
+          bleeding: state.bleeding,
+          mucusStretch: state.mucusStretch,
+          mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
+          isPeakDay: state.isPeakDay,
+        }),
+      };
+
+      await observationService.save(obs);
+      overlay.remove();
+      onSave?.();
+    });
+    actions.appendChild(saveBtn);
+    form.appendChild(actions);
+
+    modal.appendChild(form);
+  }
+
+  render();
+
+  overlay.appendChild(modal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+  document.body.appendChild(overlay);
+}
+
+// Helper: section label
+function sectionLabel(text: string): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'section-label';
+  el.textContent = text;
+  return el;
+}
+
+// Helper: toggle button group
+function toggleGroup(
+  items: { value: string; label: string; active: boolean }[],
+  onToggle: (value: string) => void,
+  singleSelect: boolean
+): HTMLElement {
+  const group = document.createElement('div');
+  group.className = 'toggle-group';
+
+  for (const item of items) {
+    const btn = document.createElement('button');
+    btn.className = `toggle-btn ${item.active ? 'active' : ''}`;
+    btn.textContent = item.label;
+    btn.addEventListener('click', () => onToggle(item.value));
+    group.appendChild(btn);
+  }
+
+  // Add "None" button for single-select
+  if (singleSelect) {
+    // Already handled by toggling off
+  }
+
+  return group;
+}
+
+// Helper: switch toggle
+function createSwitch(checked: boolean, onChange: (v: boolean) => void): HTMLElement {
+  const label = document.createElement('label');
+  label.className = 'switch';
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.checked = checked;
+  input.addEventListener('change', () => onChange(input.checked));
+  const slider = document.createElement('span');
+  slider.className = 'switch-slider';
+  label.appendChild(input);
+  label.appendChild(slider);
+  return label;
+}

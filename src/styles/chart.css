@@ -1,0 +1,119 @@
+/* Chart view styles */
+.chart-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.chart-table {
+  border-collapse: collapse;
+  min-width: 100%;
+}
+
+/* Header row with day numbers */
+.chart-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-primary);
+}
+
+.chart-header th {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 4px 2px;
+  text-align: center;
+  min-width: 44px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.chart-header th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 11;
+  background: var(--bg-primary);
+  min-width: 60px;
+}
+
+/* Cycle rows */
+.cycle-row td {
+  padding: 4px 2px;
+  text-align: center;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-color);
+  min-width: 44px;
+}
+
+.cycle-row td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--bg-card);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+  padding-left: 4px;
+  min-width: 60px;
+  white-space: nowrap;
+}
+
+.cycle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cycle-label-num {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+}
+
+.cycle-label-date {
+  font-size: 0.5625rem;
+  color: var(--text-secondary);
+}
+
+.cycle-label-len {
+  font-size: 0.5625rem;
+  color: var(--text-secondary);
+}
+
+/* Empty cells */
+.chart-empty {
+  background: var(--bg-secondary);
+}
+
+/* Peak day column highlight */
+.chart-peak-col {
+  background: rgba(255, 235, 59, 0.08);
+}
+
+/* Chart legend */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 0;
+  margin-top: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.legend-dot-green { background: var(--stamp-green); }
+.legend-dot-red { background: var(--stamp-red); }
+.legend-dot-white { background: var(--stamp-white); border: 1px solid #BDBDBD; }
+.legend-dot-yellow { background: var(--stamp-yellow); }

@@ -89,7 +89,31 @@ router.get('/me', requireAuth, (req: AuthRequest, res: Response) => {
     res.status(401).json({ error: 'Not authenticated' });
     return;
   }
-  res.json({ id: req.user.userId, email: req.user.email, firstName: req.user.firstName });
+  // Read firstName from DB in case it was updated after the JWT was issued
+  const user = db.prepare('SELECT first_name FROM users WHERE id = ?').get(req.user.userId) as
+    | { first_name: string }
+    | undefined;
+  res.json({ id: req.user.userId, email: req.user.email, firstName: user?.first_name || req.user.firstName });
+});
+
+router.put('/me', requireAuth, (req: AuthRequest, res: Response) => {
+  try {
+    const { firstName } = req.body;
+    if (!firstName || !firstName.trim()) {
+      res.status(400).json({ error: 'First name is required' });
+      return;
+    }
+    const trimmed = firstName.trim();
+    db.prepare("UPDATE users SET first_name = ?, updated_at = datetime('now') WHERE id = ?").run(trimmed, req.user!.userId);
+
+    // Re-issue JWT with updated name
+    const token = signToken({ userId: req.user!.userId, email: req.user!.email, firstName: trimmed });
+    setTokenCookie(res, token);
+    res.json({ ok: true, firstName: trimmed });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
 });
 
 export default router;

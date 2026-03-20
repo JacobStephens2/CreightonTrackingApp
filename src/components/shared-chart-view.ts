@@ -5,6 +5,7 @@ import type { Observation, Cycle } from '../db/models';
 const CHART_COLUMNS = 35;
 
 interface SharedData {
+  firstName?: string;
   observations: Observation[];
   cycles: Cycle[];
   updatedAt: string;
@@ -15,7 +16,7 @@ export function renderSharedChartView(container: HTMLElement, data: SharedData):
   const header = document.createElement('header');
   header.className = 'header';
   const h1 = document.createElement('h1');
-  h1.textContent = 'Shared Chart';
+  h1.textContent = data.firstName ? `${data.firstName}'s Chart` : 'Shared Chart';
   header.appendChild(h1);
   container.appendChild(header);
 

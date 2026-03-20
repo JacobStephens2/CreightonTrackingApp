@@ -74,6 +74,10 @@ export function shareViewHandler(req: Request, res: Response): void {
       return;
     }
 
+    const userRow = database.prepare('SELECT first_name FROM users WHERE id = ?').get(shareRow.user_id) as
+      | { first_name: string }
+      | undefined;
+
     const syncRow = database.prepare('SELECT data, updated_at FROM sync_snapshots WHERE user_id = ?').get(shareRow.user_id) as
       | { data: string; updated_at: string }
       | undefined;
@@ -93,6 +97,7 @@ export function shareViewHandler(req: Request, res: Response): void {
 
     // Strip settings entirely
     res.json({
+      firstName: userRow?.first_name || '',
       observations,
       cycles: data.cycles || [],
       updatedAt: syncRow.updated_at,

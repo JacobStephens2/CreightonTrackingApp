@@ -55,6 +55,19 @@ export const authService = {
     await syncService.upload().catch(() => {});
   },
 
+  async updateName(firstName: string): Promise<void> {
+    const res = await fetch('/api/auth/me', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Update failed');
+    }
+    this.state.firstName = firstName;
+  },
+
   async logout(): Promise<void> {
     await fetch('/api/auth/logout', { method: 'POST' });
     this.state = { loggedIn: false };

@@ -27,10 +27,37 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     const lastSyncText = lastSync ? new Date(lastSync).toLocaleString() : 'Never';
 
     const info = document.createElement('div');
-    info.innerHTML = `
-      <p style="font-size:0.875rem;margin-bottom:4px">Signed in as <strong>${authService.state.firstName || authService.state.email}</strong></p>
-      <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:12px">Last synced: ${lastSyncText}</p>
-    `;
+    info.style.cssText = 'margin-bottom:12px';
+
+    const nameRow = document.createElement('div');
+    nameRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:4px';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = authService.state.firstName || '';
+    nameInput.placeholder = 'First name';
+    nameInput.style.cssText = 'font-size:0.875rem;flex:1;padding:4px 8px';
+    let nameTimeout: ReturnType<typeof setTimeout>;
+    nameInput.addEventListener('input', () => {
+      clearTimeout(nameTimeout);
+      nameTimeout = setTimeout(async () => {
+        if (nameInput.value.trim()) {
+          await authService.updateName(nameInput.value.trim()).catch(() => {});
+        }
+      }, 500);
+    });
+    nameRow.appendChild(nameInput);
+    info.appendChild(nameRow);
+
+    const emailP = document.createElement('p');
+    emailP.style.cssText = 'font-size:0.8125rem;color:var(--text-secondary);margin:0';
+    emailP.textContent = authService.state.email || '';
+    info.appendChild(emailP);
+
+    const syncP = document.createElement('p');
+    syncP.style.cssText = 'font-size:0.8125rem;color:var(--text-secondary);margin:4px 0 0';
+    syncP.textContent = `Last synced: ${lastSyncText}`;
+    info.appendChild(syncP);
+
     accountCard.appendChild(info);
 
     const syncBtns = document.createElement('div');

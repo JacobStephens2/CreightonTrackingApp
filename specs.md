@@ -25,6 +25,8 @@ When a user creates an account, any data they have stored locally should be uplo
 
 The user's account should include their first name.
 
+The user should be able to edit the first name on their account.
+
 # Sharing with your provider
 There should be a feature that lets you share your charts with your provider. The provider should then get access to a read only view of the user's charts.
 

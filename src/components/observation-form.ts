@@ -58,7 +58,19 @@ export function showObservationForm(
     // Date
     const dateEl = document.createElement('div');
     dateEl.className = 'obs-form-date';
-    dateEl.textContent = `${dayOfWeek(date)}, ${displayDate(date)} ${date.slice(0, 4)}`;
+    if (existing) {
+      dateEl.textContent = `${dayOfWeek(state.date)}, ${displayDate(state.date)} ${state.date.slice(0, 4)}`;
+    } else {
+      const dateInput = document.createElement('input');
+      dateInput.type = 'date';
+      dateInput.value = state.date;
+      dateInput.style.cssText = 'font-size:1rem;padding:4px 8px';
+      dateInput.addEventListener('change', () => {
+        state.date = dateInput.value;
+        render();
+      });
+      dateEl.appendChild(dateInput);
+    }
     modal.appendChild(dateEl);
 
     // Preview

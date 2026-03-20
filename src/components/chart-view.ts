@@ -66,7 +66,9 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
   const tbody = document.createElement('tbody');
   const sortedCycles = [...cycles].reverse();
 
-  for (const cycle of sortedCycles) {
+  for (let i = 0; i < sortedCycles.length; i++) {
+    const cycle = sortedCycles[i];
+    const cycleNumber = cycles.length - i;
     const row = document.createElement('tr');
     row.className = 'cycle-row';
 
@@ -76,7 +78,7 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
     labelDiv.className = 'cycle-label';
     const numSpan = document.createElement('span');
     numSpan.className = 'cycle-label-num';
-    numSpan.textContent = `#${cycle.id}`;
+    numSpan.textContent = `#${cycleNumber}`;
     const dateSpan = document.createElement('span');
     dateSpan.className = 'cycle-label-date';
     dateSpan.textContent = displayDate(cycle.startDate);

@@ -4,6 +4,7 @@ import { renderCalendarView, resetCalendar } from './calendar-view';
 import { renderDayDetail } from './day-detail';
 import { renderSettingsView } from './settings-view';
 import { renderResetPasswordView } from './reset-password-view';
+import { renderVerifyEmailView } from './verify-email-view';
 import { showObservationForm } from './observation-form';
 import { today } from '../utils/date-utils';
 
@@ -97,6 +98,11 @@ export function initAppShell(): void {
   router.on('/reset-password/:token', (params) => {
     setActiveNav('settings');
     renderResetPasswordView(content, params.token);
+  });
+
+  router.on('/verify-email/:token', (params) => {
+    setActiveNav('settings');
+    renderVerifyEmailView(content, params.token);
   });
 
   router.start();

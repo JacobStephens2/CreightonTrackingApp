@@ -33,6 +33,7 @@ app.post('/api/auth/register', authLimiter);
 app.post('/api/auth/login', authLimiter);
 app.post('/api/auth/forgot-password', authLimiter);
 app.post('/api/auth/reset-password', authLimiter);
+app.post('/api/auth/resend-verification', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/sync', syncLimiter, requireAuth, syncRoutes);
 app.get('/api/share/view/:token', syncLimiter, shareViewHandler);

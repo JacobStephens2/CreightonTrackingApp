@@ -3,6 +3,7 @@ export interface AuthState {
   email?: string;
   firstName?: string;
   userId?: number;
+  emailVerified?: boolean;
 }
 
 export const authService = {
@@ -13,7 +14,7 @@ export const authService = {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const data = await res.json();
-        this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
+        this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id, emailVerified: data.emailVerified };
       } else {
         this.state = { loggedIn: false };
       }
@@ -34,7 +35,7 @@ export const authService = {
       throw new Error(data.error || 'Login failed');
     }
     const data = await res.json();
-    this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
+    this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id, emailVerified: data.emailVerified };
   },
 
   async register(firstName: string, email: string, password: string): Promise<void> {
@@ -48,7 +49,7 @@ export const authService = {
       throw new Error(data.error || 'Registration failed');
     }
     const data = await res.json();
-    this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
+    this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id, emailVerified: data.emailVerified };
 
     // Upload any existing local data to the new account
     const { syncService } = await import('./sync-service');
@@ -66,6 +67,30 @@ export const authService = {
       throw new Error(data.error || 'Update failed');
     }
     this.state.firstName = firstName;
+  },
+
+  async verifyEmail(token: string): Promise<void> {
+    const res = await fetch('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Verification failed');
+    }
+    this.state.emailVerified = true;
+  },
+
+  async resendVerification(): Promise<void> {
+    const res = await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to resend');
+    }
   },
 
   async forgotPassword(email: string): Promise<void> {

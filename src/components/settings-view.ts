@@ -60,6 +60,32 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
 
     accountCard.appendChild(info);
 
+    // Email verification banner
+    if (!authService.state.emailVerified) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#FFF3E0;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+      const bannerText = document.createElement('span');
+      bannerText.style.cssText = 'font-size:0.8125rem;color:#E65100;flex:1';
+      bannerText.textContent = 'Email not verified. Check your inbox for a verification link.';
+      banner.appendChild(bannerText);
+      const resendBtn = document.createElement('button');
+      resendBtn.style.cssText = 'background:none;border:none;color:#E65100;font-size:0.8125rem;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;white-space:nowrap';
+      resendBtn.textContent = 'Resend';
+      resendBtn.addEventListener('click', async () => {
+        resendBtn.textContent = 'Sending...';
+        resendBtn.style.pointerEvents = 'none';
+        try {
+          await authService.resendVerification();
+          resendBtn.textContent = 'Sent!';
+        } catch {
+          resendBtn.textContent = 'Failed. Try again.';
+          resendBtn.style.pointerEvents = '';
+        }
+      });
+      banner.appendChild(resendBtn);
+      accountCard.appendChild(banner);
+    }
+
     const syncBtns = document.createElement('div');
     syncBtns.style.cssText = 'display:flex;flex-direction:column;gap:8px';
 

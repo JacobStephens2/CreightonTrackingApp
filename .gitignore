@@ -2,3 +2,4 @@ node_modules
 dist
 server/dist
 server/data
+android-twa/keystore.properties

@@ -26,7 +26,8 @@ export default defineConfig({
       manifest: {
         name: 'Creighton Cycle Tracker',
         short_name: 'CrMS Tracker',
-        description: 'Track your fertility cycle using the Creighton Model',
+        description: 'Free Creighton Model (CrMS) fertility cycle tracker. Chart observations, track mucus patterns, identify peak days, and share with your FertilityCare Practitioner.',
+        categories: ['health', 'medical', 'lifestyle'],
         theme_color: '#4CAF50',
         background_color: '#FAFAFA',
         display: 'standalone',

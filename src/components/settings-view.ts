@@ -4,6 +4,7 @@ import { authService } from '../services/auth-service';
 import { syncService } from '../services/sync-service';
 import { shareService } from '../services/share-service';
 import { showToast } from '../utils/toast';
+import { applyTheme } from '../main';
 
 let renderGeneration = 0;
 
@@ -353,6 +354,28 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   }
   viewCard.appendChild(viewGroup);
   wrapper.appendChild(viewCard);
+
+  // Theme
+  const themeCard = document.createElement('div');
+  themeCard.className = 'card';
+  themeCard.innerHTML = '<div class="section-label" style="margin-top:0">Theme</div>';
+  const themeGroup = document.createElement('div');
+  themeGroup.className = 'toggle-group';
+
+  const currentTheme = settings.theme ?? 'system';
+  for (const theme of ['system', 'light', 'dark'] as const) {
+    const btn = document.createElement('button');
+    btn.className = `toggle-btn ${currentTheme === theme ? 'active' : ''}`;
+    btn.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+    btn.addEventListener('click', async () => {
+      await db.settings.put({ ...settings, theme });
+      applyTheme(theme);
+      renderSettingsView(container);
+    });
+    themeGroup.appendChild(btn);
+  }
+  themeCard.appendChild(themeGroup);
+  wrapper.appendChild(themeCard);
 
   // BIP description
   const bipCard = document.createElement('div');

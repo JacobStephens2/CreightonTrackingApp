@@ -1,5 +1,5 @@
-// Bleeding codes
-export type BleedingCode = 'H' | 'M' | 'L' | 'VL' | 'B';
+// Bleeding codes (intensity only)
+export type BleedingCode = 'H' | 'M' | 'L' | 'VL';
 
 // Mucus stretch codes (numeric descriptors)
 export type MucusStretchCode = '0' | '2' | '2W' | '4' | '6' | '8' | '10';
@@ -33,6 +33,7 @@ export interface Observation {
   date: string; // ISO YYYY-MM-DD, unique index
   cycleId?: number;
   bleeding?: BleedingCode;
+  brown?: boolean;
   mucusStretch?: MucusStretchCode;
   mucusCharacteristics?: MucusCharacteristic[];
   frequency?: FrequencyCode;
@@ -59,4 +60,5 @@ export interface UserSettings {
   bipDescription?: string;
   defaultView: 'chart' | 'calendar';
   reminderTime?: string;
+  theme?: 'light' | 'dark' | 'system';
 }

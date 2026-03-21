@@ -58,10 +58,13 @@ export function initAppShell(): void {
     { icon: ICON_SETTINGS, label: 'Settings', route: '/settings', view: 'settings' },
   ];
 
+  nav.setAttribute('aria-label', 'Main navigation');
+
   for (const item of navItems) {
     const btn = document.createElement('button');
     btn.className = 'nav-item';
     btn.innerHTML = `${item.icon}<span>${item.label}</span>`;
+    btn.setAttribute('aria-label', item.label);
     btn.addEventListener('click', () => router.navigate(item.route));
     btn.dataset.view = item.view;
     nav.appendChild(btn);
@@ -111,6 +114,12 @@ export function initAppShell(): void {
 function setActiveNav(view: ActiveView): void {
   document.querySelectorAll('.nav-item').forEach((el) => {
     const btn = el as HTMLElement;
-    btn.classList.toggle('active', btn.dataset.view === view);
+    const isActive = btn.dataset.view === view;
+    btn.classList.toggle('active', isActive);
+    if (isActive) {
+      btn.setAttribute('aria-current', 'page');
+    } else {
+      btn.removeAttribute('aria-current');
+    }
   });
 }

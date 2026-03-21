@@ -25,9 +25,11 @@ export async function renderDayDetail(container: HTMLElement, date: string): Pro
   navDiv.className = 'day-detail-nav';
   const prevBtn = document.createElement('button');
   prevBtn.innerHTML = '&#8249;';
+  prevBtn.setAttribute('aria-label', 'Previous day');
   prevBtn.addEventListener('click', () => router.navigate(`/day/${addDays(date, -1)}`));
   const nextBtn = document.createElement('button');
   nextBtn.innerHTML = '&#8250;';
+  nextBtn.setAttribute('aria-label', 'Next day');
   nextBtn.addEventListener('click', () => router.navigate(`/day/${addDays(date, 1)}`));
   navDiv.appendChild(prevBtn);
   navDiv.appendChild(nextBtn);
@@ -60,11 +62,14 @@ export async function renderDayDetail(container: HTMLElement, date: string): Pro
     const info = document.createElement('div');
     info.className = 'day-detail-info';
 
-    addRow(info, 'Code', buildObservationCode(obs.bleeding, obs.mucusStretch, obs.mucusCharacteristics, obs.frequency));
+    addRow(info, 'Code', buildObservationCode(obs.bleeding, obs.mucusStretch, obs.mucusCharacteristics, obs.frequency, obs.brown));
     addRow(info, 'Stamp', obs.stamp ?? '—');
 
     if (obs.bleeding) {
       addRow(info, 'Bleeding', `${obs.bleeding} — ${BLEEDING_LABELS[obs.bleeding as BleedingCode] ?? obs.bleeding}`);
+    }
+    if (obs.brown) {
+      addRow(info, 'Brown', 'Yes');
     }
     if (obs.mucusStretch) {
       addRow(info, 'Mucus', `${obs.mucusStretch} — ${MUCUS_STRETCH_LABELS[obs.mucusStretch as MucusStretchCode] ?? obs.mucusStretch}`);

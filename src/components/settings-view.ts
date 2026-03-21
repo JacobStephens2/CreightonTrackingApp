@@ -36,6 +36,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     nameInput.value = authService.state.firstName || '';
     nameInput.placeholder = 'First name';
     nameInput.style.cssText = 'font-size:0.875rem;flex:1;padding:4px 8px';
+    nameInput.setAttribute('aria-label', 'First name');
     let nameTimeout: ReturnType<typeof setTimeout>;
     nameInput.addEventListener('input', () => {
       clearTimeout(nameTimeout);
@@ -148,18 +149,21 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     nameInput.type = 'text';
     nameInput.placeholder = 'First name';
     nameInput.autocomplete = 'given-name';
+    nameInput.setAttribute('aria-label', 'First name');
     form.appendChild(nameInput);
 
     const emailInput = document.createElement('input');
     emailInput.type = 'email';
     emailInput.placeholder = 'Email';
     emailInput.autocomplete = 'email';
+    emailInput.setAttribute('aria-label', 'Email');
     form.appendChild(emailInput);
 
     const passwordInput = document.createElement('input');
     passwordInput.type = 'password';
     passwordInput.placeholder = 'Password (min 8 characters)';
     passwordInput.autocomplete = 'current-password';
+    passwordInput.setAttribute('aria-label', 'Password');
     form.appendChild(passwordInput);
 
     const errorMsg = document.createElement('p');

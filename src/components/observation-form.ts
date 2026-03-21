@@ -8,6 +8,7 @@ import { observationService } from '../services/observation-service';
 interface FormState {
   date: string;
   bleeding?: BleedingCode;
+  brown: boolean;
   mucusStretch?: MucusStretchCode;
   mucusCharacteristics: MucusCharacteristic[];
   frequency?: FrequencyCode;
@@ -24,6 +25,7 @@ export function showObservationForm(
   const state: FormState = {
     date,
     bleeding: existing?.bleeding,
+    brown: existing?.brown ?? false,
     mucusStretch: existing?.mucusStretch,
     mucusCharacteristics: existing?.mucusCharacteristics ? [...existing.mucusCharacteristics] : [],
     frequency: existing?.frequency,
@@ -35,6 +37,9 @@ export function showObservationForm(
   // Create modal overlay
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', existing ? 'Edit Observation' : 'New Observation');
 
   const modal = document.createElement('div');
   modal.className = 'modal-content';
@@ -50,6 +55,7 @@ export function showObservationForm(
     const closeBtn = document.createElement('button');
     closeBtn.className = 'obs-form-close';
     closeBtn.innerHTML = '&times;';
+    closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.addEventListener('click', () => overlay.remove());
     header.appendChild(title);
     header.appendChild(closeBtn);
@@ -61,15 +67,20 @@ export function showObservationForm(
     if (existing) {
       dateEl.textContent = `${dayOfWeek(state.date)}, ${displayDate(state.date)} ${state.date.slice(0, 4)}`;
     } else {
+      const dateLbl = document.createElement('label');
+      dateLbl.textContent = 'Date';
+      dateLbl.style.cssText = 'font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin-right:8px';
       const dateInput = document.createElement('input');
       dateInput.type = 'date';
       dateInput.value = state.date;
       dateInput.style.cssText = 'font-size:1rem;padding:4px 8px';
+      dateInput.setAttribute('aria-label', 'Observation date');
+      dateLbl.appendChild(dateInput);
       dateInput.addEventListener('change', () => {
         state.date = dateInput.value;
         render();
       });
-      dateEl.appendChild(dateInput);
+      dateEl.appendChild(dateLbl);
     }
     modal.appendChild(dateEl);
 
@@ -79,6 +90,7 @@ export function showObservationForm(
     const previewObs: Observation = {
       date: state.date,
       bleeding: state.bleeding,
+      brown: state.brown || undefined,
       mucusStretch: state.mucusStretch,
       mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
       frequency: state.frequency,
@@ -87,6 +99,7 @@ export function showObservationForm(
       stamp: determineStamp({
         date: state.date,
         bleeding: state.bleeding,
+        brown: state.brown || undefined,
         mucusStretch: state.mucusStretch,
         mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
         isPeakDay: state.isPeakDay,
@@ -99,7 +112,8 @@ export function showObservationForm(
       state.bleeding,
       state.mucusStretch,
       state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
-      state.frequency
+      state.frequency,
+      state.brown
     );
     preview.appendChild(codeEl);
     modal.appendChild(preview);
@@ -123,6 +137,18 @@ export function showObservationForm(
         true
       )
     );
+
+    // Brown toggle
+    const brownSection = document.createElement('div');
+    brownSection.className = 'intercourse-toggle';
+    brownSection.appendChild(createSwitch(state.brown, (v) => {
+      state.brown = v;
+      render();
+    }));
+    const brownLabel = document.createElement('label');
+    brownLabel.textContent = 'Brown';
+    brownSection.appendChild(brownLabel);
+    form.appendChild(brownSection);
 
     // Mucus stretch
     form.appendChild(sectionLabel('Mucus Observation'));
@@ -242,6 +268,7 @@ export function showObservationForm(
         ...(existing ?? {}),
         date: state.date,
         bleeding: state.bleeding,
+        brown: state.brown || undefined,
         mucusStretch: state.mucusStretch,
         mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
         frequency: state.frequency,
@@ -251,6 +278,7 @@ export function showObservationForm(
         stamp: determineStamp({
           date: state.date,
           bleeding: state.bleeding,
+          brown: state.brown || undefined,
           mucusStretch: state.mucusStretch,
           mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
           isPeakDay: state.isPeakDay,
@@ -273,7 +301,41 @@ export function showObservationForm(
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.remove();
   });
+
+  // Focus trap: keep Tab cycling within the modal
+  overlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  });
+
   document.body.appendChild(overlay);
+
+  // Focus the first focusable element in the modal
+  requestAnimationFrame(() => {
+    const first = modal.querySelector<HTMLElement>('button, input, textarea');
+    first?.focus();
+  });
 }
 
 // Helper: section label

@@ -27,6 +27,8 @@ export function renderStamp(
   el.className = `stamp ${getStampClass(stamp)} ${options?.large ? 'stamp-lg' : ''} ${
     obs?.intercourse ? 'has-intercourse' : ''
   }`.trim();
+  el.setAttribute('role', 'img');
+  el.setAttribute('aria-label', `${label} stamp${hasBaby ? ', fertile' : ''}${obs?.intercourse ? ', intercourse recorded' : ''}`);
 
   if (options?.showDay !== undefined) {
     const dayEl = document.createElement('span');
@@ -61,7 +63,8 @@ export function renderStamp(
       obs.bleeding,
       obs.mucusStretch,
       obs.mucusCharacteristics,
-      obs.frequency
+      obs.frequency,
+      obs.brown
     );
     el.appendChild(codeEl);
   }

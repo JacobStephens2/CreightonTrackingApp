@@ -22,6 +22,13 @@ async function main(): Promise<void> {
       })
       .catch(() => showToast('Could not sync from server', 'error'));
   }
+
+  // Auto-sync pending data when connectivity returns
+  window.addEventListener('online', () => {
+    if (authService.state.loggedIn) {
+      syncService.flushPending();
+    }
+  });
 }
 
 main();

@@ -1,0 +1,121 @@
+import { describe, it, expect } from 'vitest';
+import { determineStamp, getStampLabel, isBabyStamp, hasPeakTypeMucus } from '../stamp-logic';
+import type { Observation } from '../../db/models';
+
+function obs(overrides: Partial<Observation> = {}): Observation {
+  return { date: '2026-01-15', isPeakDay: false, ...overrides };
+}
+
+describe('determineStamp', () => {
+  it('returns stampOverride when set', () => {
+    expect(determineStamp(obs({ stampOverride: 'yellow' }))).toBe('yellow');
+  });
+
+  it('returns whiteBabyP for peak day', () => {
+    expect(determineStamp(obs({ isPeakDay: true }))).toBe('whiteBabyP');
+  });
+
+  it('returns red for heavy bleeding', () => {
+    expect(determineStamp(obs({ bleeding: 'H' }))).toBe('red');
+  });
+
+  it('returns red for moderate bleeding', () => {
+    expect(determineStamp(obs({ bleeding: 'M' }))).toBe('red');
+  });
+
+  it('returns red for light bleeding', () => {
+    expect(determineStamp(obs({ bleeding: 'L' }))).toBe('red');
+  });
+
+  it('returns red for very light bleeding', () => {
+    expect(determineStamp(obs({ bleeding: 'VL' }))).toBe('red');
+  });
+
+  it('returns red for brown bleeding', () => {
+    expect(determineStamp(obs({ brown: true }))).toBe('red');
+  });
+
+  it('returns whiteBaby for mucus present', () => {
+    expect(determineStamp(obs({ mucusStretch: '6' }))).toBe('whiteBaby');
+  });
+
+  it('returns green for dry day (mucus 0)', () => {
+    expect(determineStamp(obs({ mucusStretch: '0' }))).toBe('green');
+  });
+
+  it('returns green for no observations', () => {
+    expect(determineStamp(obs())).toBe('green');
+  });
+
+  it('returns greenBaby for dry day in fertile window', () => {
+    expect(determineStamp(obs(), { inFertileWindow: true })).toBe('greenBaby');
+  });
+
+  it('returns greenBaby1 for dry post-peak day 1', () => {
+    expect(determineStamp(obs(), { postPeakCount: 1 })).toBe('greenBaby1');
+  });
+
+  it('returns whiteBaby2 for mucus post-peak day 2', () => {
+    expect(determineStamp(obs({ mucusStretch: '4' }), { postPeakCount: 2 })).toBe('whiteBaby2');
+  });
+
+  it('returns greenBaby3 for dry post-peak day 3', () => {
+    expect(determineStamp(obs(), { postPeakCount: 3 })).toBe('greenBaby3');
+  });
+});
+
+describe('getStampLabel', () => {
+  it('returns empty for green', () => {
+    expect(getStampLabel('green')).toBe('');
+  });
+
+  it('returns P for peak', () => {
+    expect(getStampLabel('whiteBabyP')).toBe('P');
+  });
+
+  it('returns B for whiteBaby', () => {
+    expect(getStampLabel('whiteBaby')).toBe('B');
+  });
+
+  it('returns count numbers', () => {
+    expect(getStampLabel('whiteBaby1')).toBe('1');
+    expect(getStampLabel('greenBaby2')).toBe('2');
+    expect(getStampLabel('whiteBaby3')).toBe('3');
+  });
+});
+
+describe('isBabyStamp', () => {
+  it('returns true for baby stamps', () => {
+    expect(isBabyStamp('whiteBaby')).toBe(true);
+    expect(isBabyStamp('greenBaby1')).toBe(true);
+    expect(isBabyStamp('yellowBaby')).toBe(true);
+  });
+
+  it('returns false for non-baby stamps', () => {
+    expect(isBabyStamp('green')).toBe(false);
+    expect(isBabyStamp('red')).toBe(false);
+    expect(isBabyStamp('yellow')).toBe(false);
+  });
+});
+
+describe('hasPeakTypeMucus', () => {
+  it('returns true for stretchy (10+)', () => {
+    expect(hasPeakTypeMucus('10')).toBe(true);
+  });
+
+  it('returns true for clear characteristic', () => {
+    expect(hasPeakTypeMucus('6', ['K'])).toBe(true);
+  });
+
+  it('returns true for lubricative characteristic', () => {
+    expect(hasPeakTypeMucus('4', ['L'])).toBe(true);
+  });
+
+  it('returns false for low stretch without peak chars', () => {
+    expect(hasPeakTypeMucus('6', ['C'])).toBe(false);
+  });
+
+  it('returns false for no mucus', () => {
+    expect(hasPeakTypeMucus()).toBe(false);
+  });
+});

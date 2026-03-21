@@ -14,7 +14,14 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
   const cycles = await cycleService.getAll();
 
   if (cycles.length === 0) {
-    renderSampleChart(container);
+    if (localStorage.getItem('sampleDismissed')) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = '<h2>No Observations Yet</h2><p>Tap the + button to record your first observation.</p>';
+      container.appendChild(empty);
+    } else {
+      renderSampleChart(container);
+    }
     return;
   }
 
@@ -190,6 +197,21 @@ function renderSampleChart(container: HTMLElement): void {
     <strong>Sample Chart</strong>
     <p>This is an example of what your chart will look like. Tap the + button to record your first observation and start tracking.</p>
   `;
+
+  const dismissBtn = document.createElement('button');
+  dismissBtn.className = 'btn btn-secondary';
+  dismissBtn.style.cssText = 'margin-top:8px;font-size:0.8125rem;padding:8px 16px;min-height:36px';
+  dismissBtn.textContent = 'Dismiss Sample';
+  dismissBtn.addEventListener('click', () => {
+    localStorage.setItem('sampleDismissed', 'true');
+    container.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerHTML = '<h2>No Observations Yet</h2><p>Tap the + button to record your first observation.</p>';
+    container.appendChild(empty);
+  });
+  banner.appendChild(dismissBtn);
+
   container.appendChild(banner);
 
   // Legend

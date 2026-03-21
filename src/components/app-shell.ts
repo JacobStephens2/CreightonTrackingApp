@@ -3,6 +3,7 @@ import { renderChartView } from './chart-view';
 import { renderCalendarView, resetCalendar } from './calendar-view';
 import { renderDayDetail } from './day-detail';
 import { renderSettingsView } from './settings-view';
+import { renderResetPasswordView } from './reset-password-view';
 import { showObservationForm } from './observation-form';
 import { today } from '../utils/date-utils';
 
@@ -91,6 +92,11 @@ export function initAppShell(): void {
   router.on('/settings', () => {
     setActiveNav('settings');
     renderSettingsView(content);
+  });
+
+  router.on('/reset-password/:token', (params) => {
+    setActiveNav('settings');
+    renderResetPasswordView(content, params.token);
   });
 
   router.start();

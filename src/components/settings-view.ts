@@ -180,6 +180,40 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     btnRow.appendChild(registerBtn);
 
     form.appendChild(btnRow);
+
+    // Forgot password link
+    const forgotRow = document.createElement('div');
+    forgotRow.style.cssText = 'text-align:center;margin-top:4px';
+
+    const forgotLink = document.createElement('button');
+    forgotLink.style.cssText = 'background:none;border:none;color:var(--accent);font-size:0.8125rem;cursor:pointer;padding:4px;font-family:inherit;text-decoration:underline';
+    forgotLink.textContent = 'Forgot password?';
+    forgotLink.addEventListener('click', async () => {
+      const email = emailInput.value;
+      if (!email) {
+        errorMsg.textContent = 'Enter your email address first';
+        errorMsg.style.display = 'block';
+        return;
+      }
+      errorMsg.style.display = 'none';
+      forgotLink.textContent = 'Sending...';
+      forgotLink.style.pointerEvents = 'none';
+      try {
+        await authService.forgotPassword(email);
+        errorMsg.style.color = 'var(--accent)';
+        errorMsg.textContent = 'If an account exists with that email, a reset link has been sent.';
+        errorMsg.style.display = 'block';
+      } catch {
+        errorMsg.style.color = '#d32f2f';
+        errorMsg.textContent = 'Could not send reset email. Try again later.';
+        errorMsg.style.display = 'block';
+      }
+      forgotLink.textContent = 'Forgot password?';
+      forgotLink.style.pointerEvents = '';
+    });
+    forgotRow.appendChild(forgotLink);
+    form.appendChild(forgotRow);
+
     accountCard.appendChild(form);
   }
 

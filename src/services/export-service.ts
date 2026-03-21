@@ -1,6 +1,7 @@
 import { db } from '../db/database';
 import type { Observation, Cycle } from '../db/models';
 import { buildObservationCode } from '../utils/creighton-codes';
+import { daysBetween } from '../utils/date-utils';
 
 interface ExportData {
   version: number;
@@ -28,8 +29,16 @@ export const exportService = {
   /** Export as CSV for practitioner sharing */
   async exportCSV(): Promise<string> {
     const observations = await db.observations.orderBy('date').toArray();
+    const cycles = await db.cycles.orderBy('startDate').toArray();
+
+    // Build cycle lookup by id
+    const cycleMap = new Map<number, Cycle>();
+    cycles.forEach((c, i) => {
+      if (c.id) cycleMap.set(c.id, { ...c, notes: String(i + 1) }); // reuse notes field for cycle number
+    });
+
     const lines = [
-      'Date,Cycle,Code,Stamp,Bleeding,Brown,Mucus Stretch,Mucus Chars,Frequency,Peak Day,Intercourse,Notes',
+      'Date,Cycle #,Code,Stamp,Bleeding,Brown,Mucus Stretch,Mucus Chars,Frequency,Peak Day,Intercourse,Notes',
     ];
 
     for (const obs of observations) {
@@ -40,9 +49,10 @@ export const exportService = {
         obs.frequency,
         obs.brown
       );
+      const cycle = obs.cycleId ? cycleMap.get(obs.cycleId) : undefined;
       const row = [
         obs.date,
-        obs.cycleId ?? '',
+        cycle?.notes ?? '', // cycle number
         `"${code}"`,
         obs.stamp ?? '',
         obs.bleeding ?? '',
@@ -56,6 +66,27 @@ export const exportService = {
       ];
       lines.push(row.join(','));
     }
+
+    // Cycle summary section
+    lines.push('');
+    lines.push('Cycle Summary');
+    lines.push('Cycle #,Start Date,End Date,Length (days),Peak Day,Peak Day #,Post-Peak Length');
+
+    cycles.forEach((cycle, i) => {
+      const peakDayNum = cycle.peakDay ? daysBetween(cycle.startDate, cycle.peakDay) + 1 : '';
+      const postPeakLength = (cycle.peakDay && cycle.length)
+        ? cycle.length - (daysBetween(cycle.startDate, cycle.peakDay) + 1)
+        : '';
+      lines.push([
+        i + 1,
+        cycle.startDate,
+        cycle.endDate ?? '(current)',
+        cycle.length ?? '',
+        cycle.peakDay ?? '',
+        peakDayNum,
+        postPeakLength,
+      ].join(','));
+    });
 
     return lines.join('\n');
   },

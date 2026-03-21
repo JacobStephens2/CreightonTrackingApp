@@ -53,7 +53,8 @@ export const authService = {
 
     // Upload any existing local data to the new account
     const { syncService } = await import('./sync-service');
-    await syncService.upload().catch(() => {});
+    const { showToast } = await import('../utils/toast');
+    await syncService.upload().catch(() => showToast('Initial sync failed — your data is saved locally', 'error'));
   },
 
   async updateName(firstName: string): Promise<void> {

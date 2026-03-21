@@ -3,6 +3,7 @@ import { exportService } from '../services/export-service';
 import { authService } from '../services/auth-service';
 import { syncService } from '../services/sync-service';
 import { shareService } from '../services/share-service';
+import { showToast } from '../utils/toast';
 
 let renderGeneration = 0;
 
@@ -42,7 +43,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       clearTimeout(nameTimeout);
       nameTimeout = setTimeout(async () => {
         if (nameInput.value.trim()) {
-          await authService.updateName(nameInput.value.trim()).catch(() => {});
+          await authService.updateName(nameInput.value.trim()).catch(() => showToast('Could not save name', 'error'));
         }
       }, 500);
     });

@@ -7,6 +7,7 @@ import { initSettings } from './db/database';
 import { initAppShell } from './components/app-shell';
 import { authService } from './services/auth-service';
 import { syncService } from './services/sync-service';
+import { showToast } from './utils/toast';
 
 async function main(): Promise<void> {
   await initSettings();
@@ -19,7 +20,7 @@ async function main(): Promise<void> {
       .then(() => {
         window.dispatchEvent(new HashChangeEvent('hashchange'));
       })
-      .catch(() => {});
+      .catch(() => showToast('Could not sync from server', 'error'));
   }
 }
 

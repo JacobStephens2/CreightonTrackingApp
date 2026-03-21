@@ -4,6 +4,7 @@ import { determineStamp } from '../utils/stamp-logic';
 import { cycleService } from './cycle-service';
 import { authService } from './auth-service';
 import { syncService } from './sync-service';
+import { showToast } from '../utils/toast';
 
 export const observationService = {
   /** Save or update an observation for a given date */
@@ -26,7 +27,7 @@ export const observationService = {
 
     // Background sync if logged in
     if (authService.state.loggedIn) {
-      syncService.upload().catch(() => {});
+      syncService.upload().catch(() => showToast('Sync failed — your data is saved locally', 'error'));
     }
   },
 
@@ -62,7 +63,7 @@ export const observationService = {
     await cycleService.evaluateCycles();
 
     if (authService.state.loggedIn) {
-      syncService.upload().catch(() => {});
+      syncService.upload().catch(() => showToast('Sync failed — your data is saved locally', 'error'));
     }
   },
 

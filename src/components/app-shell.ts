@@ -5,6 +5,7 @@ import { renderDayDetail } from './day-detail';
 import { renderSettingsView } from './settings-view';
 import { renderResetPasswordView } from './reset-password-view';
 import { renderVerifyEmailView } from './verify-email-view';
+import { renderPrivacyPolicyView } from './privacy-policy-view';
 import { showObservationForm } from './observation-form';
 import { today } from '../utils/date-utils';
 
@@ -106,6 +107,11 @@ export function initAppShell(): void {
   router.on('/verify-email/:token', (params) => {
     setActiveNav('settings');
     renderVerifyEmailView(content, params.token);
+  });
+
+  router.on('/privacy', () => {
+    setActiveNav('settings');
+    renderPrivacyPolicyView(content);
   });
 
   router.start();

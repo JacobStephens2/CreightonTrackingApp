@@ -472,6 +472,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     <div style="display:flex;flex-direction:column;gap:8px">
       <a href="https://www.fertilitycare.org/" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">FertilityCare.org</a>
       <a href="https://saintpaulvi.com/" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Saint Paul VI Institute</a>
+      <a href="#/privacy" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Privacy Policy</a>
     </div>
   `;
   wrapper.appendChild(linksCard);

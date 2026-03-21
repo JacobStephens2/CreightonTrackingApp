@@ -96,14 +96,15 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     uploadBtn.textContent = 'Sync Now';
     uploadBtn.addEventListener('click', async () => {
       uploadBtn.disabled = true;
-      uploadBtn.textContent = 'Syncing...';
+      uploadBtn.classList.add('btn-loading');
       try {
         await syncService.upload();
+        showToast('Synced successfully', 'success');
         renderSettingsView(container);
       } catch (e) {
-        alert((e as Error).message);
+        showToast((e as Error).message, 'error');
         uploadBtn.disabled = false;
-        uploadBtn.textContent = 'Sync Now';
+        uploadBtn.classList.remove('btn-loading');
       }
     });
     syncBtns.appendChild(uploadBtn);
@@ -114,15 +115,15 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     downloadBtn.addEventListener('click', async () => {
       if (!confirm('This will replace all local data with the server copy. Continue?')) return;
       downloadBtn.disabled = true;
-      downloadBtn.textContent = 'Downloading...';
+      downloadBtn.classList.add('btn-loading');
       try {
         const result = await syncService.download();
-        alert(`Downloaded ${result.cycles} cycles and ${result.observations} observations.`);
+        showToast(`Downloaded ${result.cycles} cycles and ${result.observations} observations`, 'success');
         renderSettingsView(container);
       } catch (e) {
-        alert((e as Error).message);
+        showToast((e as Error).message, 'error');
         downloadBtn.disabled = false;
-        downloadBtn.textContent = 'Download from Server';
+        downloadBtn.classList.remove('btn-loading');
       }
     });
     syncBtns.appendChild(downloadBtn);
@@ -181,6 +182,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     loginBtn.addEventListener('click', async () => {
       errorMsg.style.display = 'none';
       loginBtn.disabled = true;
+      loginBtn.classList.add('btn-loading');
       try {
         await authService.login(emailInput.value, passwordInput.value);
         renderSettingsView(container);
@@ -188,6 +190,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
         errorMsg.textContent = (e as Error).message;
         errorMsg.style.display = 'block';
         loginBtn.disabled = false;
+        loginBtn.classList.remove('btn-loading');
       }
     });
     btnRow.appendChild(loginBtn);
@@ -199,6 +202,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     registerBtn.addEventListener('click', async () => {
       errorMsg.style.display = 'none';
       registerBtn.disabled = true;
+      registerBtn.classList.add('btn-loading');
       try {
         await authService.register(nameInput.value, emailInput.value, passwordInput.value);
         renderSettingsView(container);
@@ -206,6 +210,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
         errorMsg.textContent = (e as Error).message;
         errorMsg.style.display = 'block';
         registerBtn.disabled = false;
+        registerBtn.classList.remove('btn-loading');
       }
     });
     btnRow.appendChild(registerBtn);
@@ -306,14 +311,14 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
         generateBtn.textContent = 'Generate Share Link';
         generateBtn.addEventListener('click', async () => {
           generateBtn.disabled = true;
-          generateBtn.textContent = 'Generating...';
+          generateBtn.classList.add('btn-loading');
           try {
             await shareService.generate();
             renderSettingsView(container);
           } catch (e) {
-            alert((e as Error).message);
+            showToast((e as Error).message, 'error');
             generateBtn.disabled = false;
-            generateBtn.textContent = 'Generate Share Link';
+            generateBtn.classList.remove('btn-loading');
           }
         });
         shareContent.appendChild(generateBtn);

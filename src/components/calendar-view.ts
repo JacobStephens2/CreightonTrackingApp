@@ -1,4 +1,5 @@
 import { observationService } from '../services/observation-service';
+import { cycleService } from '../services/cycle-service';
 import { renderMiniStamp } from './stamp';
 import { showObservationForm } from './observation-form';
 import { today, getDatesInMonth, firstDayOfMonth, displayMonth } from '../utils/date-utils';
@@ -72,7 +73,7 @@ async function renderMonth(container: HTMLElement): Promise<void> {
   const startPad = firstDayOfMonth(currentYear, currentMonth);
   const todayStr = today();
 
-  // Fetch observations for this month
+  // Fetch observations and cycles for this month
   const firstDate = dates[0];
   const lastDate = dates[dates.length - 1];
   const observations = await observationService.getRange(firstDate, lastDate);
@@ -80,6 +81,10 @@ async function renderMonth(container: HTMLElement): Promise<void> {
   for (const obs of observations) {
     obsByDate.set(obs.date, obs);
   }
+
+  // Get cycle start dates for boundary indicators
+  const cycles = await cycleService.getAll();
+  const cycleStartDates = new Set(cycles.map(c => c.startDate));
 
   // Empty padding cells
   for (let i = 0; i < startPad; i++) {
@@ -97,6 +102,7 @@ async function renderMonth(container: HTMLElement): Promise<void> {
     cell.className = 'calendar-day';
     if (dateStr === todayStr) cell.classList.add('today');
     if (obs) cell.classList.add('has-obs');
+    if (cycleStartDates.has(dateStr)) cell.classList.add('cycle-start');
 
     const numEl = document.createElement('span');
     numEl.className = 'calendar-day-num';

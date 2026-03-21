@@ -86,6 +86,11 @@
   font-weight: 700;
 }
 
+.calendar-day.cycle-start {
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
+}
+
 /* Mini stamp inside calendar cell */
 .calendar-stamp {
   width: 20px;

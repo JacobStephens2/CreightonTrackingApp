@@ -29,7 +29,7 @@ export const exportService = {
   async exportCSV(): Promise<string> {
     const observations = await db.observations.orderBy('date').toArray();
     const lines = [
-      'Date,Cycle,Code,Stamp,Bleeding,Mucus Stretch,Mucus Chars,Frequency,Peak Day,Intercourse,Notes',
+      'Date,Cycle,Code,Stamp,Bleeding,Brown,Mucus Stretch,Mucus Chars,Frequency,Peak Day,Intercourse,Notes',
     ];
 
     for (const obs of observations) {
@@ -37,7 +37,8 @@ export const exportService = {
         obs.bleeding,
         obs.mucusStretch,
         obs.mucusCharacteristics,
-        obs.frequency
+        obs.frequency,
+        obs.brown
       );
       const row = [
         obs.date,
@@ -45,6 +46,7 @@ export const exportService = {
         `"${code}"`,
         obs.stamp ?? '',
         obs.bleeding ?? '',
+        obs.brown ? 'Y' : '',
         obs.mucusStretch ?? '',
         obs.mucusCharacteristics?.join('') ?? '',
         obs.frequency ?? '',
@@ -60,19 +62,83 @@ export const exportService = {
 
   /** Import data from JSON */
   async importJSON(jsonStr: string): Promise<{ cycles: number; observations: number }> {
-    const data: ExportData = JSON.parse(jsonStr);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch {
+      throw new Error('File is not valid JSON');
+    }
 
-    if (!data.version || !data.observations) {
+    const data = parsed as Record<string, unknown>;
+
+    if (typeof data !== 'object' || data === null || !('version' in data) || !('observations' in data)) {
       throw new Error('Invalid export file format');
     }
+    if (!Array.isArray(data.observations)) {
+      throw new Error('Invalid export file: observations must be an array');
+    }
+
+    // Validate each observation has required fields and valid types
+    const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    const VALID_BLEEDING = new Set(['H', 'M', 'L', 'VL']);
+    const VALID_STRETCH = new Set(['0', '2', '2W', '4', '6', '8', '10']);
+    const VALID_CHARS = new Set(['C', 'K', 'L', 'B', 'G', 'Y']);
+    const VALID_FREQ = new Set(['x1', 'x2', 'x3', 'AD']);
+
+    for (let i = 0; i < (data.observations as unknown[]).length; i++) {
+      const obs = (data.observations as Record<string, unknown>[])[i];
+      if (typeof obs !== 'object' || obs === null) {
+        throw new Error(`Observation at index ${i} is not an object`);
+      }
+      if (typeof obs.date !== 'string' || !DATE_RE.test(obs.date)) {
+        throw new Error(`Observation at index ${i} has invalid date: ${String(obs.date)}`);
+      }
+      if (obs.bleeding !== undefined && !VALID_BLEEDING.has(obs.bleeding as string)) {
+        throw new Error(`Observation at index ${i} has invalid bleeding code: ${String(obs.bleeding)}`);
+      }
+      if (obs.mucusStretch !== undefined && !VALID_STRETCH.has(obs.mucusStretch as string)) {
+        throw new Error(`Observation at index ${i} has invalid mucus stretch code: ${String(obs.mucusStretch)}`);
+      }
+      if (obs.mucusCharacteristics !== undefined) {
+        if (!Array.isArray(obs.mucusCharacteristics)) {
+          throw new Error(`Observation at index ${i} has invalid mucus characteristics`);
+        }
+        for (const c of obs.mucusCharacteristics) {
+          if (!VALID_CHARS.has(c as string)) {
+            throw new Error(`Observation at index ${i} has invalid mucus characteristic: ${String(c)}`);
+          }
+        }
+      }
+      if (obs.frequency !== undefined && !VALID_FREQ.has(obs.frequency as string)) {
+        throw new Error(`Observation at index ${i} has invalid frequency: ${String(obs.frequency)}`);
+      }
+    }
+
+    if (data.cycles !== undefined && !Array.isArray(data.cycles)) {
+      throw new Error('Invalid export file: cycles must be an array');
+    }
+    if (Array.isArray(data.cycles)) {
+      for (let i = 0; i < data.cycles.length; i++) {
+        const cycle = data.cycles[i] as Record<string, unknown>;
+        if (typeof cycle !== 'object' || cycle === null) {
+          throw new Error(`Cycle at index ${i} is not an object`);
+        }
+        if (typeof cycle.startDate !== 'string' || !DATE_RE.test(cycle.startDate)) {
+          throw new Error(`Cycle at index ${i} has invalid startDate: ${String(cycle.startDate)}`);
+        }
+      }
+    }
+
+    // Safe to cast after validation above
+    const validatedData = data as unknown as ExportData;
 
     let cycleCount = 0;
     let obsCount = 0;
 
     await db.transaction('rw', db.cycles, db.observations, async () => {
       // Import cycles
-      if (data.cycles) {
-        for (const cycle of data.cycles) {
+      if (validatedData.cycles) {
+        for (const cycle of validatedData.cycles) {
           const existing = await db.cycles
             .where('startDate')
             .equals(cycle.startDate)
@@ -86,7 +152,7 @@ export const exportService = {
       }
 
       // Import observations
-      for (const obs of data.observations) {
+      for (const obs of validatedData.observations) {
         const existing = await db.observations
           .where('date')
           .equals(obs.date)

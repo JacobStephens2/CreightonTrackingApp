@@ -26,8 +26,13 @@ export function determineStamp(
     return 'red';
   }
 
-  // Light bleeding / brown bleeding — still red stamp in Creighton
-  if (obs.bleeding && ['VL', 'B'].includes(obs.bleeding)) {
+  // Very light bleeding — still red stamp in Creighton
+  if (obs.bleeding === 'VL') {
+    return 'red';
+  }
+
+  // Brown bleeding alone — still red stamp in Creighton
+  if (obs.brown) {
     return 'red';
   }
 
@@ -50,7 +55,7 @@ export function determineStamp(
 }
 
 function isDryDay(obs: Observation): boolean {
-  return !obs.bleeding && (!obs.mucusStretch || obs.mucusStretch === '0');
+  return !obs.bleeding && !obs.brown && (!obs.mucusStretch || obs.mucusStretch === '0');
 }
 
 function hasMucus(obs: Observation): boolean {

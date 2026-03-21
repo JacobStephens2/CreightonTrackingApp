@@ -5,7 +5,6 @@ export const BLEEDING_LABELS: Record<BleedingCode, string> = {
   M: 'Moderate',
   L: 'Light',
   VL: 'Very Light',
-  B: 'Brown Bleeding',
 };
 
 export const MUCUS_STRETCH_LABELS: Record<MucusStretchCode, string> = {
@@ -39,12 +38,17 @@ export function buildObservationCode(
   bleeding?: BleedingCode,
   mucusStretch?: MucusStretchCode,
   mucusChars?: MucusCharacteristic[],
-  frequency?: FrequencyCode
+  frequency?: FrequencyCode,
+  brown?: boolean
 ): string {
   const parts: string[] = [];
 
   if (bleeding) {
     parts.push(bleeding);
+  }
+
+  if (brown) {
+    parts.push('B');
   }
 
   if (mucusStretch && mucusStretch !== '0') {

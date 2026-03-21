@@ -61,7 +61,7 @@ export function generateSampleData(): { cycles: Cycle[]; observationsByCycle: Ma
     { dayOffset: 2, bleeding: 'M', mucusStretch: '0', frequency: 'x2', stamp: 'red' },
     { dayOffset: 3, bleeding: 'L', mucusStretch: '0', frequency: 'x2', stamp: 'red' },
     { dayOffset: 4, bleeding: 'VL', mucusStretch: '0', frequency: 'x1', stamp: 'red' },
-    { dayOffset: 5, bleeding: 'B', mucusStretch: '0', frequency: 'x1', stamp: 'red' },
+    { dayOffset: 5, brown: true, mucusStretch: '0', frequency: 'x1', stamp: 'red' },
     { dayOffset: 6, mucusStretch: '0', frequency: 'x1', stamp: 'green' },
     { dayOffset: 7, mucusStretch: '0', frequency: 'x1', stamp: 'green' },
     { dayOffset: 8, mucusStretch: '0', frequency: 'x1', stamp: 'green' },

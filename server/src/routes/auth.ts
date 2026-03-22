@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import db from '../db/connection.js';
 import { AuthRequest, requireAuth, signToken, setTokenCookie } from '../middleware/auth.js';
+import { generateSalt } from '../utils/crypto.js';
 
 const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,7 +50,8 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
 
     const trimmedName = firstName.trim();
     const hash = await bcrypt.hash(password, 12);
-    const result = db.prepare('INSERT INTO users (email, first_name, password_hash) VALUES (?, ?, ?)').run(email.toLowerCase(), trimmedName, hash);
+    const encryptionSalt = generateSalt();
+    const result = db.prepare('INSERT INTO users (email, first_name, password_hash, encryption_salt) VALUES (?, ?, ?, ?)').run(email.toLowerCase(), trimmedName, hash, encryptionSalt);
     const userId = result.lastInsertRowid as number;
 
     // Send verification email
@@ -71,9 +73,9 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
       console.error('Failed to send verification email:', mailErr);
     }
 
-    const token = signToken({ userId, email: email.toLowerCase(), firstName: trimmedName });
+    const token = signToken({ userId, email: email.toLowerCase(), firstName: trimmedName, tokenVersion: 0 });
     setTokenCookie(res, token);
-    res.status(201).json({ id: userId, email: email.toLowerCase(), firstName: trimmedName, emailVerified: false });
+    res.status(201).json({ id: userId, email: email.toLowerCase(), firstName: trimmedName, emailVerified: false, encryptionSalt });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Registration failed' });
@@ -89,8 +91,8 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const user = db.prepare('SELECT id, email, first_name, password_hash, email_verified FROM users WHERE email = ?').get(email.toLowerCase()) as
-      | { id: number; email: string; first_name: string; password_hash: string; email_verified: number }
+    const user = db.prepare('SELECT id, email, first_name, password_hash, email_verified, encryption_salt, token_version FROM users WHERE email = ?').get(email.toLowerCase()) as
+      | { id: number; email: string; first_name: string; password_hash: string; email_verified: number; encryption_salt: string | null; token_version: number }
       | undefined;
 
     if (!user) {
@@ -104,9 +106,16 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const token = signToken({ userId: user.id, email: user.email, firstName: user.first_name });
+    // Lazy migration: generate salt for existing users
+    let encryptionSalt = user.encryption_salt;
+    if (!encryptionSalt) {
+      encryptionSalt = generateSalt();
+      db.prepare("UPDATE users SET encryption_salt = ?, updated_at = datetime('now') WHERE id = ?").run(encryptionSalt, user.id);
+    }
+
+    const token = signToken({ userId: user.id, email: user.email, firstName: user.first_name, tokenVersion: user.token_version });
     setTokenCookie(res, token);
-    res.json({ id: user.id, email: user.email, firstName: user.first_name, emailVerified: !!user.email_verified });
+    res.json({ id: user.id, email: user.email, firstName: user.first_name, emailVerified: !!user.email_verified, encryptionSalt });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -127,11 +136,16 @@ router.get('/me', requireAuth, (req: AuthRequest, res: Response) => {
     res.status(401).json({ error: 'Not authenticated' });
     return;
   }
-  // Read fresh data from DB in case it was updated after the JWT was issued
-  const user = db.prepare('SELECT first_name, email_verified FROM users WHERE id = ?').get(req.user.userId) as
-    | { first_name: string; email_verified: number }
+  const user = db.prepare('SELECT first_name, email_verified, encryption_salt FROM users WHERE id = ?').get(req.user.userId) as
+    | { first_name: string; email_verified: number; encryption_salt: string | null }
     | undefined;
-  res.json({ id: req.user.userId, email: req.user.email, firstName: user?.first_name || req.user.firstName, emailVerified: !!user?.email_verified });
+  res.json({
+    id: req.user.userId,
+    email: req.user.email,
+    firstName: user?.first_name || req.user.firstName,
+    emailVerified: !!user?.email_verified,
+    encryptionSalt: user?.encryption_salt || null,
+  });
 });
 
 router.put('/me', requireAuth, (req: AuthRequest, res: Response) => {
@@ -144,8 +158,8 @@ router.put('/me', requireAuth, (req: AuthRequest, res: Response) => {
     const trimmed = firstName.trim();
     db.prepare("UPDATE users SET first_name = ?, updated_at = datetime('now') WHERE id = ?").run(trimmed, req.user!.userId);
 
-    // Re-issue JWT with updated name
-    const token = signToken({ userId: req.user!.userId, email: req.user!.email, firstName: trimmed });
+    const user = db.prepare('SELECT token_version FROM users WHERE id = ?').get(req.user!.userId) as { token_version: number };
+    const token = signToken({ userId: req.user!.userId, email: req.user!.email, firstName: trimmed, tokenVersion: user.token_version });
     setTokenCookie(res, token);
     res.json({ ok: true, firstName: trimmed });
   } catch (err) {
@@ -178,10 +192,7 @@ router.post('/verify-email', (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Mark email as verified
     db.prepare("UPDATE users SET email_verified = 1, updated_at = datetime('now') WHERE id = ?").run(row.user_id);
-
-    // Clean up used token
     db.prepare('DELETE FROM email_verification_tokens WHERE id = ?').run(row.id);
 
     res.json({ ok: true });
@@ -202,7 +213,6 @@ router.post('/resend-verification', requireAuth, async (req: AuthRequest, res: R
       return;
     }
 
-    // Clean old tokens and create new one
     db.prepare('DELETE FROM email_verification_tokens WHERE user_id = ?').run(user.id);
     const verifyToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -247,10 +257,8 @@ router.post('/forgot-password', async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Invalidate any existing tokens for this user
     db.prepare('UPDATE password_reset_tokens SET used = 1 WHERE user_id = ? AND used = 0').run(user.id);
 
-    // Generate a secure token with 1-hour expiry
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
     db.prepare('INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)').run(user.id, token, expiresAt);
@@ -263,12 +271,11 @@ router.post('/forgot-password', async (req: AuthRequest, res: Response) => {
         from: process.env.SMTP_FROM || 'noreply@creighton.stephens.page',
         to: user.email,
         subject: 'Creighton Tracker — Password Reset',
-        text: `You requested a password reset.\n\nClick this link to set a new password (expires in 1 hour):\n${resetUrl}\n\nIf you did not request this, you can ignore this email.`,
-        html: `<p>You requested a password reset.</p><p><a href="${resetUrl}">Click here to set a new password</a> (expires in 1 hour).</p><p>If you did not request this, you can ignore this email.</p>`,
+        text: `You requested a password reset.\n\nClick this link to set a new password (expires in 1 hour):\n${resetUrl}\n\nIf you did not request this, you can ignore this email.\n\nNote: After resetting your password, you will need to sync your data again from your device to re-encrypt it with your new password.`,
+        html: `<p>You requested a password reset.</p><p><a href="${resetUrl}">Click here to set a new password</a> (expires in 1 hour).</p><p>If you did not request this, you can ignore this email.</p><p><em>Note: After resetting your password, you will need to sync your data again from your device to re-encrypt it with your new password.</em></p>`,
       });
     } catch (mailErr) {
       console.error('Failed to send reset email:', mailErr);
-      // Still return ok — don't leak mail delivery status
     }
 
     res.json({ ok: true });
@@ -310,19 +317,20 @@ router.post('/reset-password', async (req: AuthRequest, res: Response) => {
     // Mark token as used
     db.prepare('UPDATE password_reset_tokens SET used = 1 WHERE id = ?').run(row.id);
 
-    // Update password
+    // Update password, generate new encryption salt, and increment token version to invalidate all sessions
     const hash = await bcrypt.hash(password, 12);
-    db.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").run(hash, row.user_id);
+    const newSalt = generateSalt();
+    db.prepare("UPDATE users SET password_hash = ?, encryption_salt = ?, token_version = token_version + 1, updated_at = datetime('now') WHERE id = ?").run(hash, newSalt, row.user_id);
 
     // Fetch user info for auto-login
-    const user = db.prepare('SELECT id, email, first_name FROM users WHERE id = ?').get(row.user_id) as
-      | { id: number; email: string; first_name: string }
+    const user = db.prepare('SELECT id, email, first_name, encryption_salt, token_version FROM users WHERE id = ?').get(row.user_id) as
+      | { id: number; email: string; first_name: string; encryption_salt: string; token_version: number }
       | undefined;
 
     if (user) {
-      const jwt = signToken({ userId: user.id, email: user.email, firstName: user.first_name });
+      const jwt = signToken({ userId: user.id, email: user.email, firstName: user.first_name, tokenVersion: user.token_version });
       setTokenCookie(res, jwt);
-      res.json({ ok: true, id: user.id, email: user.email, firstName: user.first_name });
+      res.json({ ok: true, id: user.id, email: user.email, firstName: user.first_name, encryptionSalt: user.encryption_salt });
     } else {
       res.json({ ok: true });
     }

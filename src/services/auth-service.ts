@@ -1,3 +1,5 @@
+import { cryptoService } from './crypto-service';
+
 export interface AuthState {
   loggedIn: boolean;
   email?: string;
@@ -17,6 +19,7 @@ export const authService = {
         this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id, emailVerified: data.emailVerified };
       } else {
         this.state = { loggedIn: false };
+        cryptoService.clearKey();
       }
     } catch {
       this.state = { loggedIn: false };
@@ -36,6 +39,11 @@ export const authService = {
     }
     const data = await res.json();
     this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id, emailVerified: data.emailVerified };
+
+    // Derive and store E2E encryption key
+    if (data.encryptionSalt) {
+      await cryptoService.deriveAndStoreKey(password, data.encryptionSalt);
+    }
   },
 
   async register(firstName: string, email: string, password: string): Promise<void> {
@@ -50,6 +58,11 @@ export const authService = {
     }
     const data = await res.json();
     this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id, emailVerified: data.emailVerified };
+
+    // Derive and store E2E encryption key
+    if (data.encryptionSalt) {
+      await cryptoService.deriveAndStoreKey(password, data.encryptionSalt);
+    }
 
     // Upload any existing local data to the new account
     const { syncService } = await import('./sync-service');
@@ -119,11 +132,17 @@ export const authService = {
     const data = await res.json();
     if (data.id) {
       this.state = { loggedIn: true, email: data.email, firstName: data.firstName, userId: data.id };
+
+      // Derive new E2E key with new password and new salt
+      if (data.encryptionSalt) {
+        await cryptoService.deriveAndStoreKey(password, data.encryptionSalt);
+      }
     }
   },
 
   async logout(): Promise<void> {
     await fetch('/api/auth/logout', { method: 'POST' });
     this.state = { loggedIn: false };
+    cryptoService.clearKey();
   },
 };

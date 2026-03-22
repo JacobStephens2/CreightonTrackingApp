@@ -29,15 +29,18 @@ export function renderPrivacyPolicyView(container: HTMLElement): void {
     <ul style="font-size:0.875rem;margin:0 0 8px 20px">
       <li>Your first name and email address</li>
       <li>A hashed version of your password (never stored in plain text)</li>
-      <li>Your observation and cycle data, encrypted with AES-256-GCM before being stored on the server</li>
+      <li>Your observation and cycle data, end-to-end encrypted before leaving your device</li>
     </ul>
-    <p style="font-size:0.875rem;margin-bottom:16px">
+    <p style="font-size:0.875rem;margin-bottom:8px">
       Sync is entirely optional. The App is fully functional without an account.
+    </p>
+    <p style="font-size:0.875rem;margin-bottom:16px">
+      Your health data is encrypted on your device using a key derived from your password (PBKDF2 with 600,000 iterations) before being sent to the server. This means even the server operator cannot read your synced observations or cycle data. Only someone with your password can decrypt it.
     </p>
 
     <div class="section-label">Provider Sharing (Optional)</div>
     <p style="font-size:0.875rem;margin-bottom:16px">
-      If you generate a provider share link, a read-only view of your synced chart data is made accessible at that link. The shared view excludes private fields such as intercourse records and personal notes. You can revoke the share link at any time from Settings, which immediately disables access.
+      If you generate a provider share link, a read-only view of your synced chart data is made accessible at that link. The shared view excludes private fields such as intercourse records and personal notes. Share links expire after 90 days and can be revoked at any time from Settings, which immediately disables access. Share links use cryptographically random 256-bit tokens.
     </p>
 
     <div class="section-label">Analytics</div>
@@ -52,7 +55,7 @@ export function renderPrivacyPolicyView(container: HTMLElement): void {
 
     <div class="section-label">Data Security</div>
     <p style="font-size:0.875rem;margin-bottom:16px">
-      All communication with our server uses HTTPS encryption. Synced observation data is encrypted at rest using AES-256-GCM. Passwords are hashed using bcrypt. While no system is perfectly secure, we take reasonable measures to protect your data.
+      All communication with our server uses HTTPS encryption. Synced data is end-to-end encrypted: your device encrypts data with a key derived from your password (AES-256-GCM) before sending it to the server, and the server applies an additional encryption layer at rest. Passwords are hashed using bcrypt. Authentication tokens are invalidated when your password is reset. While no system is perfectly secure, we take reasonable measures to protect your data.
     </p>
 
     <div class="section-label">Data Deletion</div>

@@ -55,4 +55,23 @@ export function initSchema(): void {
   if (!cols.some(c => c.name === 'email_verified')) {
     db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
   }
+  if (!cols.some(c => c.name === 'encryption_salt')) {
+    db.exec("ALTER TABLE users ADD COLUMN encryption_salt TEXT");
+  }
+  if (!cols.some(c => c.name === 'token_version')) {
+    db.exec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
+  }
+
+  const syncCols = db.prepare("PRAGMA table_info(sync_snapshots)").all() as { name: string }[];
+  if (!syncCols.some(c => c.name === 'share_data')) {
+    db.exec("ALTER TABLE sync_snapshots ADD COLUMN share_data TEXT");
+  }
+  if (!syncCols.some(c => c.name === 'e2e')) {
+    db.exec("ALTER TABLE sync_snapshots ADD COLUMN e2e INTEGER NOT NULL DEFAULT 0");
+  }
+
+  const shareCols = db.prepare("PRAGMA table_info(share_tokens)").all() as { name: string }[];
+  if (!shareCols.some(c => c.name === 'expires_at')) {
+    db.exec("ALTER TABLE share_tokens ADD COLUMN expires_at TEXT");
+  }
 }

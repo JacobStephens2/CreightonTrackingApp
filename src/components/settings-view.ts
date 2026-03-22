@@ -275,6 +275,13 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
         info.textContent = 'Your provider can view your charts at this link. They will see your last synced data.';
         shareContent.appendChild(info);
 
+        if (status.expiresAt) {
+          const expiryInfo = document.createElement('p');
+          expiryInfo.style.cssText = 'font-size:0.75rem;color:var(--text-secondary);margin:4px 0 0';
+          expiryInfo.textContent = `Link expires: ${new Date(status.expiresAt).toLocaleDateString()}`;
+          shareContent.appendChild(expiryInfo);
+        }
+
         const urlInput = document.createElement('input');
         urlInput.type = 'text';
         urlInput.readOnly = true;

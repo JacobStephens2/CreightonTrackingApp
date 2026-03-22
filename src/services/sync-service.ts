@@ -1,5 +1,6 @@
 import { db } from '../db/database';
 import { cycleService } from './cycle-service';
+import { cryptoService } from './crypto-service';
 import { showToast } from '../utils/toast';
 
 const SYNC_PENDING_KEY = 'syncPending';
@@ -14,11 +15,28 @@ export const syncService = {
     const cycles = await db.cycles.toArray();
     const settings = await db.settings.get(1);
 
+    let body: string;
+
+    if (cryptoService.hasKey()) {
+      // E2E encrypted upload
+      const plaintext = JSON.stringify({ observations, cycles, settings: settings || null });
+      const encryptedData = await cryptoService.encrypt(plaintext);
+
+      // Prepare filtered share data (strip private fields)
+      const shareObservations = observations.map(({ intercourse, notes, ...safe }) => safe);
+      const shareData = { observations: shareObservations, cycles };
+
+      body = JSON.stringify({ encryptedData, shareData });
+    } else {
+      // Legacy plaintext upload (pre-E2E migration)
+      body = JSON.stringify({ observations, cycles, settings });
+    }
+
     try {
       const res = await fetch('/api/sync/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ observations, cycles, settings }),
+        body,
       });
 
       if (!res.ok) {
@@ -59,26 +77,39 @@ export const syncService = {
       throw new Error(data.error || 'Sync download failed');
     }
 
-    const data = await res.json();
+    const responseData = await res.json();
+    let data: { observations: unknown[]; cycles?: unknown[]; settings?: unknown };
+
+    if (responseData.e2e) {
+      // E2E encrypted: decrypt client-side
+      if (!cryptoService.hasKey()) {
+        throw new Error('Please sign out and back in to access your encrypted data');
+      }
+      const plaintext = await cryptoService.decrypt(responseData.encryptedData);
+      data = JSON.parse(plaintext);
+    } else {
+      // Legacy plaintext
+      data = responseData;
+    }
 
     await db.transaction('rw', db.observations, db.cycles, db.settings, async () => {
       await db.observations.clear();
       await db.cycles.clear();
 
       if (data.cycles) {
-        for (const cycle of data.cycles) {
+        for (const cycle of data.cycles as Record<string, unknown>[]) {
           const { id: _id, ...rest } = cycle;
-          await db.cycles.add(rest);
+          await db.cycles.add(rest as never);
         }
       }
 
-      for (const obs of data.observations) {
+      for (const obs of data.observations as Record<string, unknown>[]) {
         const { id: _id, ...rest } = obs;
-        await db.observations.add(rest);
+        await db.observations.add(rest as never);
       }
 
       if (data.settings) {
-        await db.settings.put({ ...data.settings, id: 1 });
+        await db.settings.put({ ...(data.settings as Record<string, unknown>), id: 1 } as never);
       }
     });
 

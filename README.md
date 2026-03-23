@@ -9,19 +9,22 @@ A PWA for tracking your fertility cycle using the Creighton Model FertilityCare 
 - **Daily observations** — bleeding (H/M/L/VL/B), mucus stretch (0–10), mucus characteristics (C/K/L/B/G/Y), frequency, peak day marking, intercourse tracking, notes
 - **Auto-computed CrMS stamps** — green (dry/infertile), red (bleeding), white (fertile/mucus), yellow (BIP), with peak day (P) and post-peak count (1/2/3)
 - **Chart view** — classic Creighton 35-column chart with cycle rows, stamps, and observation codes
-- **Calendar view** — monthly grid with mini stamps
+- **Calendar view** — monthly grid with mini stamps and cycle boundaries
 - **Auto cycle detection** — new cycle starts when bleeding resumes after non-bleeding days
 - **Auto peak day detection** — last day of peak-type mucus
-- **Export/import** — JSON backup and CSV chart export
+- **Export/import** — JSON backup and CSV chart export with cycle-level summaries
 - **Optional account & sync** — sign in to back up data to the server and access it across devices
-- **Provider sharing** — generate a read-only share link for your FertilityCare Practitioner
+- **End-to-end encryption** — synced data is encrypted client-side with PBKDF2 + AES-256-GCM; the server never sees plaintext health data
+- **Provider sharing** — generate a time-limited read-only share link for your FertilityCare Practitioner (expires after 90 days)
+- **Dark mode** — follows system preference with manual toggle
 - **Offline-capable** — full PWA with service worker, works without internet
 - **Installable** — add to home screen on Android/iOS, TWA-ready for Play Store
 
 ## Tech Stack
 
-**Frontend:** Vanilla TypeScript, Vite, Dexie.js (IndexedDB), vite-plugin-pwa
+**Frontend:** Vanilla TypeScript, Vite, Dexie.js (IndexedDB), vite-plugin-pwa, Web Crypto API
 **Backend:** Express, better-sqlite3, JWT auth, bcrypt
+**Testing:** Vitest
 **Hosting:** Apache, Let's Encrypt SSL
 
 ## Development

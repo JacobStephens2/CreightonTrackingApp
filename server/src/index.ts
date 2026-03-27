@@ -17,6 +17,15 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '5mb' }));
 
+app.use((err: any, _req, res, next) => {
+  console.error('JSON parser error', err?.message);
+  if (err && err.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'Invalid JSON payload' });
+  } else {
+    next(err);
+  }
+});
+
 const authLimiter = rateLimit({
   windowMs: 60_000,
   max: 5,

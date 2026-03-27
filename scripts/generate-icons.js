@@ -1,61 +1,77 @@
-// Simple icon generator using SVG -> data URL approach
-// Creates PNG icons from an SVG template
-import { writeFileSync, mkdirSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { mkdirSync, writeFileSync } from 'fs';
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const outputDir = 'public/app-icons';
 
-function generateSVG(size) {
-  const padding = Math.round(size * 0.15);
-  const innerSize = size - padding * 2;
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = innerSize / 2;
+function generateSVG(size, { maskable = false } = {}) {
+  const radius = maskable ? 0 : Math.round(size * 0.2);
+  const center = size / 2;
+  const markRadius = size * (maskable ? 0.25 : 0.24);
+  const stroke = size * (maskable ? 0.09 : 0.085);
+  const dotRadius = size * 0.06;
+  const accentRadius = size * 0.17;
+  const accentX = size * 0.74;
+  const accentY = size * 0.3;
 
-  // Simple flower/fertility symbol icon
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" rx="${Math.round(size * 0.2)}" fill="#4CAF50"/>
-  <circle cx="${cx}" cy="${cy}" r="${r * 0.35}" fill="white" opacity="0.95"/>
-  ${[0, 60, 120, 180, 240, 300].map(angle => {
-    const rad = (angle * Math.PI) / 180;
-    const px = cx + Math.cos(rad) * r * 0.35;
-    const py = cy + Math.sin(rad) * r * 0.35;
-    return `<circle cx="${px}" cy="${py}" r="${r * 0.22}" fill="white" opacity="0.7"/>`;
-  }).join('\n  ')}
-  <text x="${cx}" y="${cy + r * 0.12}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${r * 0.45}" font-weight="bold" fill="#4CAF50">C</text>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8d6466"/>
+      <stop offset="100%" stop-color="#6b4747"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="25%" r="75%">
+      <stop offset="0%" stop-color="#f7c5c5" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f7c5c5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="${size}" height="${size}" rx="${radius}" fill="url(#bg)"/>
+  <circle cx="${size * 0.28}" cy="${size * 0.22}" r="${size * 0.34}" fill="url(#glow)" opacity="0.55"/>
+  <circle cx="${center}" cy="${center}" r="${size * 0.3}" fill="#fff7f6" opacity="0.14"/>
+  <circle cx="${accentX}" cy="${accentY}" r="${accentRadius}" fill="#f7c5c5" opacity="0.22"/>
+  <path d="M ${center + markRadius * 0.75} ${center - markRadius * 0.95}
+           A ${markRadius} ${markRadius} 0 1 0 ${center + markRadius * 0.75} ${center + markRadius * 0.95}"
+        fill="none"
+        stroke="#fff7f6"
+        stroke-width="${stroke}"
+        stroke-linecap="round"/>
+  <circle cx="${center + markRadius * 0.9}" cy="${center - markRadius * 0.65}" r="${dotRadius}" fill="#daf8e8"/>
 </svg>`;
 }
 
-function generateMaskableSVG(size) {
-  // Maskable icons need safe zone (inner 80%)
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = size * 0.28;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" fill="#4CAF50"/>
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" opacity="0.95"/>
-  ${[0, 60, 120, 180, 240, 300].map(angle => {
-    const rad = (angle * Math.PI) / 180;
-    const px = cx + Math.cos(rad) * r;
-    const py = cy + Math.sin(rad) * r;
-    return `<circle cx="${px}" cy="${py}" r="${r * 0.6}" fill="white" opacity="0.7"/>`;
-  }).join('\n  ')}
-  <text x="${cx}" y="${cy + r * 0.25}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${r * 1.1}" font-weight="bold" fill="#4CAF50">C</text>
-</svg>`;
+function writeSVG(path, svg) {
+  writeFileSync(path, svg);
+  console.log(`Generated ${path}`);
 }
 
-mkdirSync('public/icons', { recursive: true });
+function writePNG(svgPath, pngPath, size) {
+  execFileSync('convert', [
+    '-background',
+    'none',
+    '-resize',
+    `${size}x${size}`,
+    svgPath,
+    pngPath,
+  ]);
+  console.log(`Generated ${pngPath}`);
+}
+
+mkdirSync(outputDir, { recursive: true });
 
 for (const size of sizes) {
+  const svgPath = `${outputDir}/icon-${size}x${size}.svg`;
+  const pngPath = `${outputDir}/icon-${size}x${size}.png`;
   const svg = generateSVG(size);
-  writeFileSync(`public/icons/icon-${size}x${size}.svg`, svg);
-  console.log(`Generated icon-${size}x${size}.svg`);
+  writeSVG(svgPath, svg);
+  writePNG(svgPath, pngPath, size);
 }
 
-// Maskable
-const maskableSvg = generateMaskableSVG(512);
-writeFileSync('public/icons/maskable-icon-512x512.svg', maskableSvg);
-console.log('Generated maskable-icon-512x512.svg');
+const maskableSvgPath = `${outputDir}/maskable-icon-512x512.svg`;
+const maskablePngPath = `${outputDir}/maskable-icon-512x512.png`;
+writeSVG(maskableSvgPath, generateSVG(512, { maskable: true }));
+writePNG(maskableSvgPath, maskablePngPath, 512);
 
-console.log('\nNote: SVG icons generated. For production, convert to PNG using a tool like sharp or Inkscape.');
-console.log('The PWA manifest references PNG files. For development, we will update the manifest to use SVG.');
+const faviconSvgPath = 'public/favicon.svg';
+writeSVG(faviconSvgPath, generateSVG(64));
+
+console.log('Updated app icons and favicon.');

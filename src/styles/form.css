@@ -2,43 +2,46 @@
 .obs-form {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .obs-form-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .obs-form-header h2 {
-  font-size: 1.125rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .obs-form-close {
   width: 40px;
   height: 40px;
   border: none;
-  background: none;
+  background: var(--surface-mid);
   font-size: 1.5rem;
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-full);
+  border-radius: 50%;
 }
 
 .obs-form-close:active {
-  background: var(--bg-secondary);
+  transform: scale(0.96);
 }
 
 /* Date display */
 .obs-form-date {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 /* Preview area */
@@ -46,14 +49,14 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  margin-bottom: 8px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(123, 85, 86, 0.1), rgba(218, 248, 232, 0.5));
+  border-radius: 28px;
+  margin-bottom: 10px;
 }
 
 .obs-preview-code {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
@@ -68,7 +71,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
+  padding: 12px 16px;
+  background: var(--surface-low);
+  border-radius: 22px;
 }
 
 .intercourse-toggle label {
@@ -93,7 +98,7 @@
 .switch-slider {
   position: absolute;
   inset: 0;
-  background: #BDBDBD;
+  background: rgba(122, 123, 121, 0.28);
   border-radius: 14px;
   cursor: pointer;
   transition: background 0.2s;
@@ -125,8 +130,7 @@
   display: flex;
   gap: 8px;
   margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
 }
 
 .obs-form-actions .btn {
@@ -143,7 +147,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-low);
+  border-radius: 22px;
 }
 
 .peak-toggle-label {

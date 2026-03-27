@@ -1,11 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="38" fill="#4CAF50"/>
-  <circle cx="96" cy="96" r="23.45" fill="white" opacity="0.95"/>
-  <circle cx="119.45" cy="96" r="14.74" fill="white" opacity="0.7"/>
-  <circle cx="107.725" cy="116.30829571874509" r="14.74" fill="white" opacity="0.7"/>
-  <circle cx="84.275" cy="116.30829571874509" r="14.74" fill="white" opacity="0.7"/>
-  <circle cx="72.55" cy="96" r="14.74" fill="white" opacity="0.7"/>
-  <circle cx="84.27499999999999" cy="75.69170428125491" r="14.74" fill="white" opacity="0.7"/>
-  <circle cx="107.725" cy="75.69170428125491" r="14.74" fill="white" opacity="0.7"/>
-  <text x="96" y="104.03999999999999" text-anchor="middle" font-family="Arial,sans-serif" font-size="30.150000000000002" font-weight="bold" fill="#4CAF50">C</text>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8d6466"/>
+      <stop offset="100%" stop-color="#6b4747"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="25%" r="75%">
+      <stop offset="0%" stop-color="#f7c5c5" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f7c5c5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
+  <circle cx="53.760000000000005" cy="42.24" r="65.28" fill="url(#glow)" opacity="0.55"/>
+  <circle cx="96" cy="96" r="57.599999999999994" fill="#fff7f6" opacity="0.14"/>
+  <circle cx="142.07999999999998" cy="57.599999999999994" r="32.64" fill="#f7c5c5" opacity="0.22"/>
+  <path d="M 130.56 52.224000000000004
+           A 46.08 46.08 0 1 0 130.56 139.776"
+        fill="none"
+        stroke="#fff7f6"
+        stroke-width="16.32"
+        stroke-linecap="round"/>
+  <circle cx="137.472" cy="66.048" r="11.52" fill="#daf8e8"/>
 </svg>

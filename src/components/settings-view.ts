@@ -148,12 +148,15 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     const form = document.createElement('div');
     form.style.cssText = 'display:flex;flex-direction:column;gap:8px';
 
+    let createAccountMode = false;
+
+    const nameField = document.createElement('div');
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.placeholder = 'First name';
     nameInput.autocomplete = 'given-name';
     nameInput.setAttribute('aria-label', 'First name');
-    form.appendChild(nameInput);
+    nameField.appendChild(nameInput);
 
     const emailInput = document.createElement('input');
     emailInput.type = 'email';
@@ -181,11 +184,23 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     loginBtn.style.flex = '1';
     loginBtn.textContent = 'Sign In';
     loginBtn.addEventListener('click', async () => {
+      createAccountMode = false;
+      nameField.remove();
       errorMsg.style.display = 'none';
+      errorMsg.style.color = '#d32f2f';
       loginBtn.disabled = true;
       loginBtn.classList.add('btn-loading');
+      const emailValue = emailInput.value.trim();
+      const passwordValue = passwordInput.value;
+      if (!emailValue || !passwordValue) {
+        errorMsg.textContent = 'Email and password are required';
+        errorMsg.style.display = 'block';
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('btn-loading');
+        return;
+      }
       try {
-        await authService.login(emailInput.value, passwordInput.value);
+        await authService.login(emailValue.toLowerCase(), passwordValue);
         renderSettingsView(container);
       } catch (e) {
         errorMsg.textContent = (e as Error).message;
@@ -201,11 +216,25 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     registerBtn.style.flex = '1';
     registerBtn.textContent = 'Create Account';
     registerBtn.addEventListener('click', async () => {
+      if (!createAccountMode) {
+        createAccountMode = true;
+        form.insertBefore(nameField, emailInput);
+        errorMsg.style.display = 'none';
+        requestAnimationFrame(() => nameInput.focus());
+        return;
+      }
+
       errorMsg.style.display = 'none';
+      errorMsg.style.color = '#d32f2f';
+      if (!nameInput.value.trim()) {
+        errorMsg.textContent = 'Enter your first name to create an account';
+        errorMsg.style.display = 'block';
+        return;
+      }
       registerBtn.disabled = true;
       registerBtn.classList.add('btn-loading');
       try {
-        await authService.register(nameInput.value, emailInput.value, passwordInput.value);
+        await authService.register(nameInput.value.trim(), emailInput.value, passwordInput.value);
         renderSettingsView(container);
       } catch (e) {
         errorMsg.textContent = (e as Error).message;

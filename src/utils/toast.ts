@@ -17,19 +17,20 @@ export function showToast(message: string, type: 'success' | 'error' | 'info' = 
   toast.setAttribute('aria-live', 'polite');
 
   const bgColors = {
-    success: '#388E3C',
-    error: '#d32f2f',
-    info: '#455A64',
+    success: 'rgba(75, 101, 89, 0.92)',
+    error: 'rgba(170, 55, 28, 0.92)',
+    info: 'rgba(49, 51, 49, 0.9)',
   };
 
   toast.style.cssText = `
     background:${bgColors[type]};
     color:#fff;
-    padding:10px 20px;
-    border-radius:var(--radius-sm);
+    padding:12px 20px;
+    border-radius:20px;
     font-size:0.875rem;
     font-family:var(--font-family);
     box-shadow:var(--shadow-md);
+    backdrop-filter:blur(18px);
     pointer-events:auto;
     animation:toastIn 0.2s ease-out;
     max-width:100%;

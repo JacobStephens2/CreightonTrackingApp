@@ -4,6 +4,7 @@ import path from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.resolve(__dirname, '../../data/creighton.db');
+console.log('Opening Creighton DB at', dbPath);
 
 const database = new Database(dbPath);
 database.pragma('journal_mode = WAL');

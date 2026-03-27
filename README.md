@@ -7,7 +7,7 @@ A PWA for tracking your fertility cycle using the Creighton Model FertilityCare 
 ## Features
 
 - **Daily observations** — bleeding (H/M/L/VL/B), mucus stretch (0–10), mucus characteristics (C/K/L/B/G/Y), frequency, peak day marking, intercourse tracking, notes
-- **Auto-computed CrMS stamps** — green (dry/infertile), red (bleeding), white (fertile/mucus), yellow (BIP), with peak day (P) and post-peak count (1/2/3)
+- **Auto-computed CrMS stamps** — green (dry/infertile), red (bleeding), white (fertile/mucus), yellow (Basic Infertile Pattern), with peak day (P) and post-peak count (1/2/3)
 - **Chart view** — classic Creighton 35-column chart with cycle rows, stamps, and observation codes
 - **Calendar view** — monthly grid with mini stamps and cycle boundaries
 - **Auto cycle detection** — new cycle starts when bleeding resumes after non-bleeding days

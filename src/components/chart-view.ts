@@ -32,7 +32,7 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
     { color: 'green', label: 'Dry / Infertile' },
     { color: 'red', label: 'Bleeding' },
     { color: 'white', label: 'Fertile (Mucus)' },
-    { color: 'yellow', label: 'BIP' },
+    { color: 'yellow', label: 'Basic Infertile Pattern' },
   ];
   for (const item of legendItems) {
     const li = document.createElement('div');
@@ -50,10 +50,10 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
         popup.className = 'bip-popup card';
         popup.style.cssText = 'margin-top:8px;padding:12px;font-size:0.8125rem;line-height:1.5';
         popup.innerHTML = `
-          <strong>BIP — Basic Infertile Pattern</strong><br>
+          <strong>Basic Infertile Pattern</strong><br>
           Your Basic Infertile Pattern is the pattern of discharge you consistently observe during
           infertile phases of your cycle, as identified with your FertilityCare Practitioner.
-          Days matching your BIP are marked with a yellow stamp.
+          Days matching your Basic Infertile Pattern are marked with a yellow stamp.
         `;
         popup.addEventListener('click', () => popup.remove());
         legend.appendChild(popup);
@@ -221,7 +221,7 @@ function renderSampleChart(container: HTMLElement): void {
     { color: 'green', label: 'Dry / Infertile' },
     { color: 'red', label: 'Bleeding' },
     { color: 'white', label: 'Fertile (Mucus)' },
-    { color: 'yellow', label: 'BIP' },
+    { color: 'yellow', label: 'Basic Infertile Pattern' },
   ];
   for (const item of legendItems) {
     const li = document.createElement('div');

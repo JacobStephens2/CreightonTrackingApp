@@ -12,7 +12,7 @@
 
   - Daily observation entry — bleeding (H/M/L/VL/B), mucus stretch (0-10), mucus characteristics (C/K/L/B/G/Y),
   frequency, peak day marking, intercourse tracking, notes
-  - Auto-computed CrMS stamps — green (dry/infertile), red (bleeding), white baby (fertile/mucus), yellow (BIP),
+  - Auto-computed CrMS stamps — green (dry/infertile), red (bleeding), white baby (fertile/mucus), yellow (Basic Infertile Pattern),
    with peak day (P) and post-peak count (1/2/3)
   - Chart view — classic Creighton 35-column chart with cycle rows, stamps, and observation codes
   - Calendar view — monthly grid with mini stamps
@@ -20,7 +20,7 @@
   - Auto cycle detection — new cycle starts when bleeding resumes after non-bleeding days
   - Auto peak day detection — last day of peak-type mucus (stretchy/clear/lubricative)
   - Export/import — JSON backup and CSV chart export for practitioner sharing
-  - Settings — BIP description, default view, data management
+  - Settings — Basic Infertile Pattern description, default view, data management
 
   PWA / Play Store
 

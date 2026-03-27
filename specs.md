@@ -32,8 +32,8 @@ There should be a link in the shared chart view to the main site.
 
 The shared chart view should show the name of the person whose chart you are viewing.
 
-# Clicking the BIP for a pop up explanation
-The user should be able to click the BIP icon in the legend to show an element which explains to them what it stands for and what it is.
+# Clicking the Basic Infertile Pattern for a pop up explanation
+The user should be able to click the Basic Infertile Pattern icon in the legend to show an element which explains to them what it is.
 
 # Link to Creighton's Website
 There should be links to https://www.fertilitycare.org/ and https://saintpaulvi.com/ for more information.

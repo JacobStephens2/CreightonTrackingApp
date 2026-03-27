@@ -31,9 +31,7 @@ export function initAppShell(): void {
     <div class="header-brand">
       <div class="header-mark">${ICON_LOGO}</div>
       <div class="header-copy">
-        <span class="header-eyebrow">Living Journal</span>
         <h1>Creighton Tracker</h1>
-        <span class="header-subtitle">Cycle charting, built around daily observation.</span>
       </div>
     </div>
   `;

@@ -413,11 +413,11 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   themeCard.appendChild(themeGroup);
   wrapper.appendChild(themeCard);
 
-  // BIP description
+  // Basic Infertile Pattern description
   const bipCard = document.createElement('div');
   bipCard.className = 'card';
   bipCard.innerHTML = `
-    <div class="section-label" style="margin-top:0">Base Infertile Pattern (BIP)</div>
+    <div class="section-label" style="margin-top:0">Basic Infertile Pattern</div>
     <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:8px">
       Describe your basic infertile pattern as identified with your FertilityCare Practitioner.
     </p>

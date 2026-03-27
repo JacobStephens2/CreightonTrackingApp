@@ -24,7 +24,7 @@ export type StampType =
   | 'greenBaby2'  // Post-peak count day 2 (dry)
   | 'greenBaby3'  // Post-peak count day 3 (dry)
   | 'red'         // Menstrual bleeding
-  | 'yellow'      // Unchanging discharge (BIP)
+  | 'yellow'      // Unchanging discharge (Basic Infertile Pattern)
   | 'yellowBaby'; // Potentially fertile yellow
 
 // A single day's observation

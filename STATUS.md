@@ -16,7 +16,7 @@ Last updated: 2026-03-20
 | Provider sharing (read-only link) | Done | Generate/revoke link, strips private fields (intercourse, notes) |
 | Link to main site in shared view | Done | "Start tracking with Creighton Tracker" link |
 | Show user's name in shared chart | Done | "{Name}'s Chart" header |
-| BIP legend popup explanation | Done | Clickable in both chart view and shared chart view |
+| Basic Infertile Pattern legend popup explanation | Done | Clickable in both chart view and shared chart view |
 | Links to FertilityCare.org & Saint Paul VI | Done | Learn More card in settings |
 | Date picker for new observations | Done | Date input defaulting to today, static date when editing |
 

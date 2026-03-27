@@ -8,3 +8,4 @@ android-twa/*.aab
 android-twa/*.apk
 android-twa/.gradle/
 android-twa/**/build/
+server/.env

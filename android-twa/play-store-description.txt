@@ -1,0 +1,17 @@
+Creighton Cycle Tracker is a simple, private app for tracking your fertility cycle using the Creighton Model System (CrMS).
+Record your daily observations including bleeding level, mucus characteristics, stretch, and frequency. The app automatically computes your CrMS stamps — green for dry days, red for bleeding, white for fertile mucus, and yellow for days of basic infertile pattern — with automatic peak day detection and post-peak counting.
+View your cycle data the way it's meant to be seen with the classic 35-column Creighton chart, just like the paper charts used by FertilityCare Practitioners. Switch to the calendar view for a monthly overview with color-coded stamps at a glance.
+Share your chart with your FertilityCare Practitioner using a secure, read-only link. No account needed on their end — just send the link and they can review your chart from any device.
+Your data stays on your device by default. The app works fully offline with no internet required. Create an optional account to back up your data and sync across devices.
+Export your data anytime as a JSON backup or CSV chart export. Your data is yours.
+Key features:
+- Daily observation entry with bleeding, mucus, stretch, frequency, and notes
+- Auto-computed CrMS stamps with peak day and post-peak count
+- Classic 35-column Creighton chart view
+- Monthly calendar view with color-coded stamps
+- Automatic cycle detection
+- Provider sharing with secure read-only links
+- Full offline support
+- Optional cloud sync across devices
+- Data export in JSON and CSV formats
+- No ads, no tracking, no subscriptions

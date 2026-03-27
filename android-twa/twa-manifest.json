@@ -1,0 +1,38 @@
+{
+  "packageId": "com.creighton.tracker",
+  "host": "creighton.stephens.page",
+  "name": "Creighton Cycle Tracker",
+  "launcherName": "CrMS Tracker",
+  "display": "standalone",
+  "themeColor": "#4CAF50",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#FAFAFA",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://creighton.stephens.page/app-icons/icon-512x512.png",
+  "maskableIconUrl": "https://creighton.stephens.page/app-icons/maskable-icon-512x512.png",
+  "shortcuts": [],
+  "signingKey": {
+    "path": "/home/jacob/CreightonTrackingApp/android-twa/creighton-keystore.jks",
+    "alias": "creighton-tracker"
+  },
+  "appVersionCode": 1,
+  "appVersionName": "1.0.0",
+  "splashScreenFadeOutDuration": 300,
+  "generatorApp": "nicmichan.nicmichan.github.io-nicmichan.github.io-cli",
+  "webManifestUrl": "https://creighton.stephens.page/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://creighton.stephens.page/",
+  "minSdkVersion": 19,
+  "orientation": "portrait"
+}

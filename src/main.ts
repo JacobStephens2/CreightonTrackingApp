@@ -8,6 +8,7 @@ import { initAppShell } from './components/app-shell';
 import { authService } from './services/auth-service';
 import { syncService } from './services/sync-service';
 import { showToast } from './utils/toast';
+import { initCookieConsent } from './utils/cookie-consent';
 
 export function applyTheme(theme: 'light' | 'dark' | 'system' = 'system'): void {
   if (theme === 'system') {
@@ -26,6 +27,34 @@ async function main(): Promise<void> {
 
   const auth = await authService.checkAuth().catch(() => authService.state);
   initAppShell();
+
+  // First-visit disclaimer popup
+  if (!localStorage.getItem('disclaimerDismissed')) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-content" style="padding:28px 22px calc(28px + env(safe-area-inset-bottom, 0px))">
+        <h2 style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:14px">Welcome to Creighton Tracker</h2>
+        <p style="font-size:0.9rem;line-height:1.6;color:var(--text-secondary);margin-bottom:14px">
+          This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner.
+          The Creighton Model FertilityCare System should be learned through proper instruction.
+          To find an instructor in your area, visit <a href="https://www.fertilitycare.org/find-a-center/" target="_blank" rel="noopener" style="color:var(--accent)">FertilityCare.org</a>.
+        </p>
+        <p style="font-size:0.9rem;line-height:1.6;color:var(--text-secondary);margin-bottom:20px">
+          All data is stored locally on your device. If you sign in, your data is end-to-end encrypted before being backed up to our server for cross-device access — no one else can read it, not even us.
+        </p>
+        <button class="btn btn-primary btn-block" id="dismiss-disclaimer">I Understand</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('dismiss-disclaimer')!.addEventListener('click', () => {
+      localStorage.setItem('disclaimerDismissed', '1');
+      overlay.remove();
+    });
+  }
+
+  // Cookie consent (loads GA only if accepted)
+  initCookieConsent();
 
   // Auto-download from server on load if logged in, then re-render
   if (auth.loggedIn) {

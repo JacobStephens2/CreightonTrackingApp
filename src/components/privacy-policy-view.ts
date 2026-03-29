@@ -43,9 +43,9 @@ export function renderPrivacyPolicyView(container: HTMLElement): void {
       If you generate a provider share link, a read-only view of your synced chart data is made accessible at that link. The shared view excludes private fields such as intercourse records and personal notes. Share links expire after 90 days and can be revoked at any time from Settings, which immediately disables access. Share links use cryptographically random 256-bit tokens.
     </p>
 
-    <div class="section-label">Analytics</div>
+    <div class="section-label">Analytics & Cookies</div>
     <p style="font-size:0.875rem;margin-bottom:16px">
-      The App uses Google Analytics to collect anonymous usage data such as page views and general device information. No health data or personal observations are sent to Google Analytics. You can opt out by using a browser extension that blocks Google Analytics or by disabling JavaScript.
+      The App uses Google Analytics to collect anonymous usage data such as page views and general device information. Analytics cookies are only set if you accept them via the consent banner shown on your first visit. No health data or personal observations are sent to Google Analytics. You can change your preference at any time from our <a href="#/cookies" style="color:var(--accent)">Cookie Policy</a> page.
     </p>
 
     <div class="section-label">Third-Party Sharing</div>

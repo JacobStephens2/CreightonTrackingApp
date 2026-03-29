@@ -519,6 +519,8 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       <a href="https://www.fertilitycare.org/" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">FertilityCare.org</a>
       <a href="https://saintpaulvi.com/" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Saint Paul VI Institute</a>
       <a href="#/privacy" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Privacy Policy</a>
+      <a href="#/terms" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Terms of Use</a>
+      <a href="#/cookies" class="btn btn-secondary btn-block" style="text-decoration:none;text-align:center">Cookie Policy</a>
     </div>
   `;
   wrapper.appendChild(linksCard);
@@ -526,15 +528,23 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   // Disclaimer
   const disclaimer = document.createElement('div');
   disclaimer.className = 'disclaimer';
-  disclaimer.textContent =
+  disclaimer.innerHTML =
     'This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner. ' +
     'The Creighton Model FertilityCare System should be learned through proper instruction. ' +
-    'All data is stored locally on your device. If you sign in, your data can also be backed up to our server for cross-device access.';
+    'To find an instructor in your area, visit <a href="https://www.fertilitycare.org/find-a-center/" target="_blank" rel="noopener" style="color:var(--accent)">FertilityCare.org</a>.<br><br>' +
+    'All data is stored locally on your device. If you sign in, your data is end-to-end encrypted before being backed up to our server for cross-device access \u2014 no one else can read it, not even us.';
   wrapper.appendChild(disclaimer);
+
+  // Attribution
+  const attribution = document.createElement('p');
+  attribution.style.cssText = 'text-align:center;font-size:0.75rem;color:var(--text-secondary);margin-top:16px;line-height:1.6';
+  attribution.innerHTML =
+    'Built by <a href="https://stephens.page" target="_blank" rel="noopener" style="color:var(--accent)">Jacob Stephens</a>';
+  wrapper.appendChild(attribution);
 
   // Version
   const version = document.createElement('p');
-  version.style.cssText = 'text-align:center;font-size:0.75rem;color:var(--text-secondary);margin-top:16px';
+  version.style.cssText = 'text-align:center;font-size:0.75rem;color:var(--text-secondary);margin-top:8px';
   version.textContent = 'Creighton Cycle Tracker v1.0.0';
   wrapper.appendChild(version);
 

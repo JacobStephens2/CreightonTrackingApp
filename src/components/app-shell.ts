@@ -6,6 +6,8 @@ import { renderSettingsView } from './settings-view';
 import { renderResetPasswordView } from './reset-password-view';
 import { renderVerifyEmailView } from './verify-email-view';
 import { renderPrivacyPolicyView } from './privacy-policy-view';
+import { renderTermsOfUseView } from './terms-of-use-view';
+import { renderCookiePolicyView } from './cookie-policy-view';
 import { showObservationForm } from './observation-form';
 import { today } from '../utils/date-utils';
 
@@ -137,6 +139,18 @@ export function initAppShell(): void {
     setActiveNav('settings');
     setContentLayout(content, 'default');
     renderPrivacyPolicyView(content);
+  });
+
+  router.on('/terms', () => {
+    setActiveNav('settings');
+    setContentLayout(content, 'default');
+    renderTermsOfUseView(content);
+  });
+
+  router.on('/cookies', () => {
+    setActiveNav('settings');
+    setContentLayout(content, 'default');
+    renderCookiePolicyView(content);
   });
 
   router.start();

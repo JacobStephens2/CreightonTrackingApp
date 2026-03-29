@@ -41,13 +41,6 @@ export function renderStamp(
   circle.className = 'stamp-circle';
   circle.textContent = label;
 
-  // Baby dot
-  const babyDot = document.createElement('span');
-  babyDot.className = 'stamp-baby-dot';
-  if (hasBaby) {
-    circle.appendChild(babyDot);
-  }
-
   // Intercourse indicator
   const icDot = document.createElement('span');
   icDot.className = 'stamp-intercourse';

@@ -530,9 +530,11 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   disclaimer.className = 'disclaimer';
   disclaimer.innerHTML =
     'This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner. ' +
-    'The Creighton Model FertilityCare System should be learned through proper instruction. ' +
+    'The Creighton Model FertilityCare\u2122 System should be learned through proper instruction. ' +
     'To find an instructor in your area, visit <a href="https://www.fertilitycare.org/find-a-center/" target="_blank" rel="noopener" style="color:var(--accent)">FertilityCare.org</a>.<br><br>' +
-    'All data is stored locally on your device. If you sign in, your data is end-to-end encrypted before being backed up to our server for cross-device access \u2014 no one else can read it, not even us.';
+    'All data is stored locally on your device. If you sign in, your data is end-to-end encrypted before being backed up to our server for cross-device access \u2014 no one else can read it, not even us.<br><br>' +
+    'This app is an independent project and is not affiliated with, endorsed by, or sponsored by FertilityCare Centers of America, Creighton University, or the Saint Paul VI Institute. ' +
+    'Creighton Model FertilityCare\u2122 System is a trademark of FertilityCare Centers of America. Used here for descriptive purposes only.';
   wrapper.appendChild(disclaimer);
 
   // Attribution

@@ -51,9 +51,15 @@ export function renderTermsOfUseView(container: HTMLElement): void {
       <li>Reverse-engineer, decompile, or disassemble the App beyond what is permitted by law</li>
     </ul>
 
-    <div class="section-label">Intellectual Property</div>
+    <div class="section-label">Intellectual Property & Trademarks</div>
+    <p style="font-size:0.875rem;margin-bottom:8px">
+      The App and its original content, features, and functionality are owned by Jacob Stephens.
+    </p>
+    <p style="font-size:0.875rem;margin-bottom:8px">
+      This app is an independent project and is not affiliated with, endorsed by, or sponsored by FertilityCare Centers of America, Creighton University, or the Saint Paul VI Institute. Creighton Model FertilityCare\u2122 System is a trademark of FertilityCare Centers of America. Used here for descriptive purposes only.
+    </p>
     <p style="font-size:0.875rem;margin-bottom:16px">
-      The App and its original content, features, and functionality are owned by Jacob Stephens. The Creighton Model FertilityCare System is a standardized modification of the Billings Ovulation Method developed at Creighton University. All related trademarks belong to their respective owners.
+      All other trademarks referenced in the App belong to their respective owners.
     </p>
 
     <div class="section-label">Disclaimer of Warranties</div>

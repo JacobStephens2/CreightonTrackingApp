@@ -77,9 +77,14 @@ export function renderPrivacyPolicyView(container: HTMLElement): void {
     </p>
 
     <div class="section-label">Contact</div>
-    <p style="font-size:0.875rem;margin-bottom:0">
+    <p style="font-size:0.875rem;margin-bottom:16px">
       If you have questions about this privacy policy or your data, contact Jacob Stephens at
       <a href="mailto:jacob@stephens.page" style="color:var(--accent)">jacob@stephens.page</a>.
+    </p>
+
+    <div class="section-label">Trademark Notice</div>
+    <p style="font-size:0.875rem;margin-bottom:0">
+      This app is an independent project and is not affiliated with, endorsed by, or sponsored by FertilityCare Centers of America, Creighton University, or the Saint Paul VI Institute. Creighton Model FertilityCare\u2122 System is a trademark of FertilityCare Centers of America. Used here for descriptive purposes only.
     </p>
   `;
 

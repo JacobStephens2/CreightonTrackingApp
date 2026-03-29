@@ -203,9 +203,11 @@ export function renderSharedChartView(container: HTMLElement, data: SharedData):
   // Disclaimer
   const disclaimer = document.createElement('div');
   disclaimer.className = 'disclaimer';
-  disclaimer.textContent =
+  disclaimer.innerHTML =
     'This is a shared read-only view of a Creighton Model chart. ' +
-    'This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner.';
+    'This app is a personal charting tool and is not a substitute for instruction from a certified FertilityCare Practitioner.<br><br>' +
+    '<span style="font-size:0.72rem">This app is not affiliated with, endorsed by, or sponsored by FertilityCare Centers of America, Creighton University, or the Saint Paul VI Institute. ' +
+    'Creighton Model FertilityCare\u2122 System is a trademark of FertilityCare Centers of America.</span>';
   content.appendChild(disclaimer);
 
   // Link to main site

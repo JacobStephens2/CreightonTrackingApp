@@ -1,5 +1,5 @@
 import type { Observation, BleedingCode, MucusStretchCode, MucusCharacteristic, FrequencyCode } from '../db/models';
-import { BLEEDING_LABELS, MUCUS_STRETCH_LABELS, MUCUS_CHAR_LABELS, FREQUENCY_LABELS, buildObservationCode } from '../utils/creighton-codes';
+import { BLEEDING_LABELS, MUCUS_STRETCH_ORDER, MUCUS_STRETCH_LABELS, MUCUS_CHAR_LABELS, FREQUENCY_LABELS, buildObservationCode } from '../utils/creighton-codes';
 import { displayDate, dayOfWeek } from '../utils/date-utils';
 import { determineStamp } from '../utils/stamp-logic';
 import { renderStamp } from './stamp';
@@ -154,9 +154,9 @@ export function showObservationForm(
     form.appendChild(sectionLabel('Mucus Observation'));
     form.appendChild(
       toggleGroup(
-        Object.entries(MUCUS_STRETCH_LABELS).map(([code, label]) => ({
+        MUCUS_STRETCH_ORDER.map((code) => ({
           value: code,
-          label: `${code} - ${label}`,
+          label: `${code} - ${MUCUS_STRETCH_LABELS[code]}`,
           active: state.mucusStretch === code,
         })),
         (val) => {

@@ -7,6 +7,8 @@ export const BLEEDING_LABELS: Record<BleedingCode, string> = {
   VL: 'Very Light',
 };
 
+export const MUCUS_STRETCH_ORDER: MucusStretchCode[] = ['0', '2', '2W', '4', '6', '8', '10', '10SL'];
+
 export const MUCUS_STRETCH_LABELS: Record<MucusStretchCode, string> = {
   '0': 'Dry',
   '2': 'Damp',

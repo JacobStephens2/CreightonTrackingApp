@@ -64,6 +64,16 @@
   box-shadow: 8px 0 14px rgba(245, 243, 241, 0.95);
 }
 
+[data-theme="dark"] .cycle-row td:first-child {
+  box-shadow: 8px 0 14px rgba(39, 40, 38, 0.95);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cycle-row td:first-child {
+    box-shadow: 8px 0 14px rgba(39, 40, 38, 0.95);
+  }
+}
+
 .cycle-row td:last-child {
   border-radius: 0 20px 20px 0;
 }

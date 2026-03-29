@@ -451,6 +451,16 @@ button {
   color: var(--text-on-dark);
 }
 
+[data-theme="dark"] .toggle-btn.active {
+  color: #1e1f1d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toggle-btn.active {
+    color: #1e1f1d;
+  }
+}
+
 .toggle-btn:active {
   transform: scale(0.98);
 }

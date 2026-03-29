@@ -129,6 +129,7 @@ export function showObservationForm(
           value: code,
           label: `${code} - ${label}`,
           active: state.bleeding === code,
+          colorHint: 'red',
         })),
         (val) => {
           state.bleeding = state.bleeding === val ? undefined : (val as BleedingCode);
@@ -154,11 +155,15 @@ export function showObservationForm(
     form.appendChild(sectionLabel('Mucus Observation'));
     form.appendChild(
       toggleGroup(
-        MUCUS_STRETCH_ORDER.map((code) => ({
-          value: code,
-          label: `${code} - ${MUCUS_STRETCH_LABELS[code]}`,
-          active: state.mucusStretch === code,
-        })),
+        MUCUS_STRETCH_ORDER.map((code) => {
+          const greenCodes = ['0', '2', '2W', '4'];
+          return {
+            value: code,
+            label: `${code} - ${MUCUS_STRETCH_LABELS[code]}`,
+            active: state.mucusStretch === code,
+            colorHint: greenCodes.includes(code) ? 'green' : undefined,
+          };
+        }),
         (val) => {
           state.mucusStretch = state.mucusStretch === val ? undefined : (val as MucusStretchCode);
           render();
@@ -348,7 +353,7 @@ function sectionLabel(text: string): HTMLElement {
 
 // Helper: toggle button group
 function toggleGroup(
-  items: { value: string; label: string; active: boolean }[],
+  items: { value: string; label: string; active: boolean; colorHint?: string }[],
   onToggle: (value: string) => void,
   singleSelect: boolean
 ): HTMLElement {
@@ -357,7 +362,7 @@ function toggleGroup(
 
   for (const item of items) {
     const btn = document.createElement('button');
-    btn.className = `toggle-btn ${item.active ? 'active' : ''}`;
+    btn.className = `toggle-btn ${item.active ? 'active' : ''} ${item.colorHint ? 'toggle-hint-' + item.colorHint : ''}`.trim();
     btn.textContent = item.label;
     btn.addEventListener('click', () => onToggle(item.value));
     group.appendChild(btn);

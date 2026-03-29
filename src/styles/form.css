@@ -66,6 +66,23 @@
   margin-bottom: 4px;
 }
 
+/* Color hint backgrounds for toggle buttons */
+.toggle-hint-red {
+  background: rgba(200, 111, 102, 0.15);
+}
+
+.toggle-hint-red.active {
+  background: var(--stamp-red);
+}
+
+.toggle-hint-green {
+  background: rgba(79, 123, 99, 0.15);
+}
+
+.toggle-hint-green.active {
+  background: var(--stamp-green);
+}
+
 /* Intercourse toggle */
 .intercourse-toggle {
   display: flex;

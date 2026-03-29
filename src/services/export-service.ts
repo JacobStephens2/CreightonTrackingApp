@@ -112,7 +112,7 @@ export const exportService = {
     // Validate each observation has required fields and valid types
     const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
     const VALID_BLEEDING = new Set(['H', 'M', 'L', 'VL']);
-    const VALID_STRETCH = new Set(['0', '2', '2W', '4', '6', '8', '10']);
+    const VALID_STRETCH = new Set(['0', '2', '2W', '4', '6', '8', '10', '10SL']);
     const VALID_CHARS = new Set(['C', 'K', 'L', 'B', 'G', 'Y']);
     const VALID_FREQ = new Set(['x1', 'x2', 'x3', 'AD']);
 

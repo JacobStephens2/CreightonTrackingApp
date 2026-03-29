@@ -2,7 +2,7 @@
 export type BleedingCode = 'H' | 'M' | 'L' | 'VL';
 
 // Mucus stretch codes (numeric descriptors)
-export type MucusStretchCode = '0' | '2' | '2W' | '4' | '6' | '8' | '10';
+export type MucusStretchCode = '0' | '2' | '2W' | '4' | '6' | '8' | '10' | '10SL';
 
 // Mucus characteristic modifiers
 export type MucusCharacteristic = 'C' | 'K' | 'L' | 'B' | 'G' | 'Y';

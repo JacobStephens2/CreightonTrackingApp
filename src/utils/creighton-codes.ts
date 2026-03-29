@@ -15,6 +15,7 @@ export const MUCUS_STRETCH_LABELS: Record<MucusStretchCode, string> = {
   '6': 'Sticky (¼")',
   '8': 'Tacky (½")',
   '10': 'Stretchy (1"+)',
+  '10SL': 'Shiny / Lubricative',
 };
 
 export const MUCUS_CHAR_LABELS: Record<MucusCharacteristic, string> = {

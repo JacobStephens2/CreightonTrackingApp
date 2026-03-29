@@ -94,7 +94,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
 
     const uploadBtn = document.createElement('button');
     uploadBtn.className = 'btn btn-secondary btn-block';
-    uploadBtn.textContent = 'Sync Now';
+    uploadBtn.textContent = 'Upload to Server';
     uploadBtn.addEventListener('click', async () => {
       uploadBtn.disabled = true;
       uploadBtn.classList.add('btn-loading');
@@ -109,6 +109,11 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       }
     });
     syncBtns.appendChild(uploadBtn);
+
+    const uploadHint = document.createElement('p');
+    uploadHint.style.cssText = 'font-size:0.75rem;color:var(--text-secondary);margin:-4px 0 4px;padding:0 4px';
+    uploadHint.textContent = 'Saves this device\u2019s data to the server, replacing what\u2019s stored there.';
+    syncBtns.appendChild(uploadHint);
 
     const downloadBtn = document.createElement('button');
     downloadBtn.className = 'btn btn-secondary btn-block';
@@ -128,6 +133,11 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       }
     });
     syncBtns.appendChild(downloadBtn);
+
+    const downloadHint = document.createElement('p');
+    downloadHint.style.cssText = 'font-size:0.75rem;color:var(--text-secondary);margin:-4px 0 4px;padding:0 4px';
+    downloadHint.textContent = 'Replaces this device\u2019s data with what\u2019s on the server.';
+    syncBtns.appendChild(downloadHint);
 
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'btn btn-secondary btn-block';

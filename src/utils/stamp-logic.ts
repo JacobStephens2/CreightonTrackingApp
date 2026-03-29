@@ -75,8 +75,8 @@ export function getStampColor(stamp: StampType): string {
 export function getStampLabel(stamp: StampType): string {
   switch (stamp) {
     case 'green': return '';
-    case 'greenBaby': return 'B';
-    case 'whiteBaby': return 'B';
+    case 'greenBaby': return '🐣';
+    case 'whiteBaby': return '🐣';
     case 'whiteBabyP': return 'P';
     case 'whiteBaby1': return '1';
     case 'whiteBaby2': return '2';
@@ -86,7 +86,7 @@ export function getStampLabel(stamp: StampType): string {
     case 'greenBaby3': return '3';
     case 'red': return '';
     case 'yellow': return '';
-    case 'yellowBaby': return 'B';
+    case 'yellowBaby': return '🐣';
     default: return '';
   }
 }

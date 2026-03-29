@@ -73,8 +73,8 @@ describe('getStampLabel', () => {
     expect(getStampLabel('whiteBabyP')).toBe('P');
   });
 
-  it('returns B for whiteBaby', () => {
-    expect(getStampLabel('whiteBaby')).toBe('B');
+  it('returns chick emoji for whiteBaby', () => {
+    expect(getStampLabel('whiteBaby')).toBe('🐣');
   });
 
   it('returns count numbers', () => {

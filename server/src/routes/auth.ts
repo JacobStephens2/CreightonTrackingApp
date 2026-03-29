@@ -73,6 +73,19 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
       console.error('Failed to send verification email:', mailErr);
     }
 
+    // Notify admin of new registration
+    try {
+      const transport = getMailTransport();
+      await transport.sendMail({
+        from: process.env.SMTP_FROM || 'noreply@creighton.stephens.page',
+        to: 'jacob@stephens.page',
+        subject: 'Creighton Tracker — New Account Created',
+        text: `A new account was created on Creighton Tracker.\n\nName: ${trimmedName}\nEmail: ${email.toLowerCase()}\nDate: ${new Date().toISOString()}`,
+      });
+    } catch (notifyErr) {
+      console.error('Failed to send admin notification:', notifyErr);
+    }
+
     const token = signToken({ userId, email: email.toLowerCase(), firstName: trimmedName, tokenVersion: 0 });
     setTokenCookie(res, token);
     res.status(201).json({ id: userId, email: email.toLowerCase(), firstName: trimmedName, emailVerified: false, encryptionSalt });

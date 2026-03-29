@@ -17,7 +17,7 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '5mb' }));
 
-app.use((err: any, _req, res, next) => {
+app.use((err: any, _req: any, res: any, next: any) => {
   console.error('JSON parser error', err?.message);
   if (err && err.type === 'entity.parse.failed') {
     res.status(400).json({ error: 'Invalid JSON payload' });

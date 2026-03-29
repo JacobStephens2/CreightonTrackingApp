@@ -35,11 +35,10 @@ describe('determineStamp', () => {
     expect(determineStamp(obs({ brown: true }))).toBe('red');
   });
 
-  it('returns white for mucus present (no fertile context)', () => {
-    expect(determineStamp(obs({ mucusStretch: '6' }))).toBe('white');
-  });
-
-  it('returns whiteBaby for mucus present in fertile window', () => {
+  it('returns whiteBaby for any mucus day', () => {
+    expect(determineStamp(obs({ mucusStretch: '6' }))).toBe('whiteBaby');
+    expect(determineStamp(obs({ mucusStretch: '8' }))).toBe('whiteBaby');
+    expect(determineStamp(obs({ mucusStretch: '10' }))).toBe('whiteBaby');
     expect(determineStamp(obs({ mucusStretch: '6' }), { inFertileWindow: true })).toBe('whiteBaby');
   });
 
@@ -69,6 +68,10 @@ describe('determineStamp', () => {
 
   it('returns whiteBaby2 for mucus post-peak day 2', () => {
     expect(determineStamp(obs({ mucusStretch: '6' }), { postPeakCount: 2 })).toBe('whiteBaby2');
+  });
+
+  it('returns greenBaby1 for bleeding post-peak day 1', () => {
+    expect(determineStamp(obs({ bleeding: 'L' }), { postPeakCount: 1 })).toBe('greenBaby1');
   });
 
   it('returns greenBaby3 for dry post-peak day 3', () => {

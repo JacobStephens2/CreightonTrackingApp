@@ -11,14 +11,13 @@ export function determineStamp(
   // Peak day
   if (obs.isPeakDay) return 'whiteBabyP';
 
-  // Post-peak count days
+  // Post-peak count days — always fertile, regardless of observation
   if (context?.postPeakCount && context.postPeakCount >= 1 && context.postPeakCount <= 3) {
-    const isDry = isDryDay(obs);
     const count = context.postPeakCount as 1 | 2 | 3;
-    if (isDry) {
-      return `greenBaby${count}` as StampType;
+    if (hasMucus(obs)) {
+      return `whiteBaby${count}` as StampType;
     }
-    return `whiteBaby${count}` as StampType;
+    return `greenBaby${count}` as StampType;
   }
 
   // Menstrual bleeding
@@ -36,12 +35,9 @@ export function determineStamp(
     return 'red';
   }
 
-  // Mucus present
+  // Mucus present — always potentially fertile
   if (hasMucus(obs)) {
-    if (context?.inFertileWindow) {
-      return 'whiteBaby';
-    }
-    return 'white';
+    return 'whiteBaby';
   }
 
   // Dry day
@@ -80,7 +76,6 @@ export function getStampLabel(stamp: StampType): string {
   switch (stamp) {
     case 'green': return '';
     case 'greenBaby': return '🐣';
-    case 'white': return '';
     case 'whiteBaby': return '🐣';
     case 'whiteBabyP': return 'P';
     case 'whiteBaby1': return '1';

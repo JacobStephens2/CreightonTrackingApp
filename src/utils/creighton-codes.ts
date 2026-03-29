@@ -7,7 +7,7 @@ export const BLEEDING_LABELS: Record<BleedingCode, string> = {
   VL: 'Very Light',
 };
 
-export const MUCUS_STRETCH_ORDER: MucusStretchCode[] = ['0', '2', '2W', '4', '6', '8', '10', '10SL'];
+export const MUCUS_STRETCH_ORDER: MucusStretchCode[] = ['0', '2', '2W', '4', '6', '8', '10', '10DL', '10SL', '10WL'];
 
 export const MUCUS_STRETCH_LABELS: Record<MucusStretchCode, string> = {
   '0': 'Dry',
@@ -17,7 +17,9 @@ export const MUCUS_STRETCH_LABELS: Record<MucusStretchCode, string> = {
   '6': 'Sticky (¼")',
   '8': 'Tacky (½")',
   '10': 'Stretchy (1"+)',
+  '10DL': 'Damp / Lubricative',
   '10SL': 'Shiny / Lubricative',
+  '10WL': 'Wet / Lubricative',
 };
 
 export const MUCUS_CHAR_LABELS: Record<MucusCharacteristic, string> = {

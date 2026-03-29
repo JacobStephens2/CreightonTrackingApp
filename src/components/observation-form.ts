@@ -170,9 +170,9 @@ export function showObservationForm(
       )
     );
 
-    // Mucus observation (6, 8, 10, 10SL)
+    // Mucus observation (6, 8, 10, 10DL, 10SL, 10WL)
     form.appendChild(sectionLabel('Cervical Mucus'));
-    const mucusCodes: MucusStretchCode[] = ['6', '8', '10', '10SL'];
+    const mucusCodes: MucusStretchCode[] = ['6', '8', '10', '10DL', '10SL', '10WL'];
     form.appendChild(
       toggleGroup(
         mucusCodes.map((code) => ({
@@ -189,8 +189,8 @@ export function showObservationForm(
       )
     );
 
-    // Mucus characteristics (only if actual mucus: 6, 8, 10, 10SL)
-    const actualMucusCodes = new Set(['6', '8', '10', '10SL']);
+    // Mucus characteristics (only if actual mucus: 6, 8, 10, 10DL, 10SL, 10WL)
+    const actualMucusCodes = new Set(['6', '8', '10', '10DL', '10SL', '10WL']);
     if (state.mucusStretch && actualMucusCodes.has(state.mucusStretch)) {
       form.appendChild(sectionLabel('Mucus Characteristics'));
       form.appendChild(

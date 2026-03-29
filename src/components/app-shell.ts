@@ -8,6 +8,7 @@ import { renderVerifyEmailView } from './verify-email-view';
 import { renderPrivacyPolicyView } from './privacy-policy-view';
 import { renderTermsOfUseView } from './terms-of-use-view';
 import { renderCookiePolicyView } from './cookie-policy-view';
+import { renderSystemGuideView } from './system-guide-view';
 import { showObservationForm } from './observation-form';
 import { today } from '../utils/date-utils';
 
@@ -151,6 +152,12 @@ export function initAppShell(): void {
     setActiveNav('settings');
     setContentLayout(content, 'default');
     renderCookiePolicyView(content);
+  });
+
+  router.on('/guide', () => {
+    setActiveNav('settings');
+    setContentLayout(content, 'default');
+    renderSystemGuideView(content);
   });
 
   router.start();

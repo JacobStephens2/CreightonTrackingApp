@@ -507,6 +507,19 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   });
   btnGroup.appendChild(clearBtn);
 
+  // Show Sample Data (only if not signed in and no observations)
+  const obsCount = await db.observations.count();
+  if (!authService.state.loggedIn && obsCount === 0) {
+    const sampleBtn = document.createElement('button');
+    sampleBtn.className = 'btn btn-secondary btn-block';
+    sampleBtn.textContent = 'Show Sample Data';
+    sampleBtn.addEventListener('click', () => {
+      localStorage.removeItem('sampleDismissed');
+      window.location.hash = '/chart';
+    });
+    btnGroup.appendChild(sampleBtn);
+  }
+
   dataCard.appendChild(btnGroup);
   wrapper.appendChild(dataCard);
 

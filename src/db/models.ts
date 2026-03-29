@@ -15,7 +15,8 @@ export type StampColor = 'green' | 'red' | 'white' | 'yellow';
 export type StampType =
   | 'green'       // Dry / infertile
   | 'greenBaby'   // Potentially fertile but dry
-  | 'whiteBaby'   // Fertile (mucus present)
+  | 'white'       // Mucus present (not in fertile window)
+  | 'whiteBaby'   // Fertile (mucus present, in fertile window)
   | 'whiteBabyP'  // Peak day
   | 'whiteBaby1'  // Post-peak count day 1
   | 'whiteBaby2'  // Post-peak count day 2

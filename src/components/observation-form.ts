@@ -1,5 +1,5 @@
 import type { Observation, BleedingCode, MucusStretchCode, MucusCharacteristic, FrequencyCode } from '../db/models';
-import { BLEEDING_LABELS, MUCUS_STRETCH_ORDER, MUCUS_STRETCH_LABELS, MUCUS_CHAR_LABELS, FREQUENCY_LABELS, buildObservationCode } from '../utils/creighton-codes';
+import { BLEEDING_LABELS, MUCUS_STRETCH_LABELS, MUCUS_CHAR_LABELS, FREQUENCY_LABELS, buildObservationCode } from '../utils/creighton-codes';
 import { displayDate, dayOfWeek } from '../utils/date-utils';
 import { determineStamp } from '../utils/stamp-logic';
 import { renderStamp } from './stamp';
@@ -151,19 +151,17 @@ export function showObservationForm(
     brownSection.appendChild(brownLabel);
     form.appendChild(brownSection);
 
-    // Mucus stretch
-    form.appendChild(sectionLabel('Mucus Observation'));
+    // Vulvar observation (non-mucus: 0, 2, 2W, 4)
+    form.appendChild(sectionLabel('Vulvar Observation (Non-Mucus)'));
+    const nonMucusCodes: MucusStretchCode[] = ['0', '2', '2W', '4'];
     form.appendChild(
       toggleGroup(
-        MUCUS_STRETCH_ORDER.map((code) => {
-          const greenCodes = ['0', '2', '2W', '4'];
-          return {
-            value: code,
-            label: `${code} - ${MUCUS_STRETCH_LABELS[code]}`,
-            active: state.mucusStretch === code,
-            colorHint: greenCodes.includes(code) ? 'green' : undefined,
-          };
-        }),
+        nonMucusCodes.map((code) => ({
+          value: code,
+          label: `${code} - ${MUCUS_STRETCH_LABELS[code]}`,
+          active: state.mucusStretch === code,
+          colorHint: 'green',
+        })),
         (val) => {
           state.mucusStretch = state.mucusStretch === val ? undefined : (val as MucusStretchCode);
           render();
@@ -172,8 +170,28 @@ export function showObservationForm(
       )
     );
 
-    // Mucus characteristics (only if mucus > 0)
-    if (state.mucusStretch && state.mucusStretch !== '0') {
+    // Mucus observation (6, 8, 10, 10SL)
+    form.appendChild(sectionLabel('Cervical Mucus'));
+    const mucusCodes: MucusStretchCode[] = ['6', '8', '10', '10SL'];
+    form.appendChild(
+      toggleGroup(
+        mucusCodes.map((code) => ({
+          value: code,
+          label: `${code} - ${MUCUS_STRETCH_LABELS[code]}`,
+          active: state.mucusStretch === code,
+          colorHint: 'white',
+        })),
+        (val) => {
+          state.mucusStretch = state.mucusStretch === val ? undefined : (val as MucusStretchCode);
+          render();
+        },
+        true
+      )
+    );
+
+    // Mucus characteristics (only if actual mucus: 6, 8, 10, 10SL)
+    const actualMucusCodes = new Set(['6', '8', '10', '10SL']);
+    if (state.mucusStretch && actualMucusCodes.has(state.mucusStretch)) {
       form.appendChild(sectionLabel('Mucus Characteristics'));
       form.appendChild(
         toggleGroup(

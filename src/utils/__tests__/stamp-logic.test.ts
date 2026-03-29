@@ -35,28 +35,40 @@ describe('determineStamp', () => {
     expect(determineStamp(obs({ brown: true }))).toBe('red');
   });
 
-  it('returns whiteBaby for mucus present', () => {
-    expect(determineStamp(obs({ mucusStretch: '6' }))).toBe('whiteBaby');
+  it('returns white for mucus present (no fertile context)', () => {
+    expect(determineStamp(obs({ mucusStretch: '6' }))).toBe('white');
   });
 
-  it('returns green for dry day (mucus 0)', () => {
+  it('returns whiteBaby for mucus present in fertile window', () => {
+    expect(determineStamp(obs({ mucusStretch: '6' }), { inFertileWindow: true })).toBe('whiteBaby');
+  });
+
+  it('returns green for non-mucus codes (0, 2, 2W, 4)', () => {
     expect(determineStamp(obs({ mucusStretch: '0' }))).toBe('green');
+    expect(determineStamp(obs({ mucusStretch: '2' }))).toBe('green');
+    expect(determineStamp(obs({ mucusStretch: '2W' }))).toBe('green');
+    expect(determineStamp(obs({ mucusStretch: '4' }))).toBe('green');
   });
 
   it('returns green for no observations', () => {
     expect(determineStamp(obs())).toBe('green');
   });
 
-  it('returns greenBaby for dry day in fertile window', () => {
+  it('returns greenBaby for non-mucus day in fertile window', () => {
     expect(determineStamp(obs(), { inFertileWindow: true })).toBe('greenBaby');
+    expect(determineStamp(obs({ mucusStretch: '4' }), { inFertileWindow: true })).toBe('greenBaby');
   });
 
   it('returns greenBaby1 for dry post-peak day 1', () => {
     expect(determineStamp(obs(), { postPeakCount: 1 })).toBe('greenBaby1');
   });
 
+  it('returns greenBaby2 for non-mucus post-peak day 2', () => {
+    expect(determineStamp(obs({ mucusStretch: '4' }), { postPeakCount: 2 })).toBe('greenBaby2');
+  });
+
   it('returns whiteBaby2 for mucus post-peak day 2', () => {
-    expect(determineStamp(obs({ mucusStretch: '4' }), { postPeakCount: 2 })).toBe('whiteBaby2');
+    expect(determineStamp(obs({ mucusStretch: '6' }), { postPeakCount: 2 })).toBe('whiteBaby2');
   });
 
   it('returns greenBaby3 for dry post-peak day 3', () => {

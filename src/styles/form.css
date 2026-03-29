@@ -83,6 +83,17 @@
   background: var(--stamp-green);
 }
 
+.toggle-hint-white {
+  background: rgba(255, 253, 251, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(122, 123, 121, 0.15);
+}
+
+.toggle-hint-white.active {
+  background: var(--stamp-white);
+  color: var(--surface, #1e1f1d);
+  box-shadow: inset 0 0 0 1px rgba(122, 123, 121, 0.3);
+}
+
 /* Intercourse toggle */
 .intercourse-toggle {
   display: flex;

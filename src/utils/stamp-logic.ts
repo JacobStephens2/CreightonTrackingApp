@@ -36,14 +36,16 @@ export function determineStamp(
     return 'red';
   }
 
-  // Mucus present — fertile
+  // Mucus present
   if (hasMucus(obs)) {
-    return 'whiteBaby';
+    if (context?.inFertileWindow) {
+      return 'whiteBaby';
+    }
+    return 'white';
   }
 
   // Dry day
   if (isDryDay(obs)) {
-    // If in a fertile window context, green baby
     if (context?.inFertileWindow) {
       return 'greenBaby';
     }
@@ -54,13 +56,15 @@ export function determineStamp(
   return 'green';
 }
 
+const NON_MUCUS_CODES = new Set(['0', '2', '2W', '4']);
+
 function isDryDay(obs: Observation): boolean {
-  return !obs.bleeding && !obs.brown && (!obs.mucusStretch || obs.mucusStretch === '0');
+  return !obs.bleeding && !obs.brown && (!obs.mucusStretch || NON_MUCUS_CODES.has(obs.mucusStretch));
 }
 
 function hasMucus(obs: Observation): boolean {
   if (!obs.mucusStretch) return false;
-  return obs.mucusStretch !== '0';
+  return !NON_MUCUS_CODES.has(obs.mucusStretch);
 }
 
 /** Get the display color for a stamp type */
@@ -76,6 +80,7 @@ export function getStampLabel(stamp: StampType): string {
   switch (stamp) {
     case 'green': return '';
     case 'greenBaby': return '🐣';
+    case 'white': return '';
     case 'whiteBaby': return '🐣';
     case 'whiteBabyP': return 'P';
     case 'whiteBaby1': return '1';

@@ -1,6 +1,7 @@
 import type { Observation, StampType } from '../db/models';
 import { getStampLabel, isBabyStamp } from '../utils/stamp-logic';
 import { buildObservationCode } from '../utils/creighton-codes';
+import { displayDate } from '../utils/date-utils';
 
 /** Get the CSS class for a stamp's color group */
 function getStampClass(stamp: StampType): string {
@@ -17,7 +18,7 @@ function getStampClass(stamp: StampType): string {
 /** Render a stamp element */
 export function renderStamp(
   obs?: Observation,
-  options?: { large?: boolean; showCode?: boolean; showDay?: number; onClick?: () => void }
+  options?: { large?: boolean; showCode?: boolean; showDate?: string; onClick?: () => void }
 ): HTMLElement {
   const el = document.createElement('div');
   const stamp = obs?.stamp ?? 'green';
@@ -30,10 +31,10 @@ export function renderStamp(
   el.setAttribute('role', 'img');
   el.setAttribute('aria-label', `${label} stamp${hasBaby ? ', fertile' : ''}${obs?.intercourse ? ', intercourse recorded' : ''}`);
 
-  if (options?.showDay !== undefined) {
+  if (options?.showDate !== undefined) {
     const dayEl = document.createElement('span');
     dayEl.className = 'stamp-day';
-    dayEl.textContent = String(options.showDay);
+    dayEl.textContent = displayDate(options.showDate);
     el.appendChild(dayEl);
   }
 

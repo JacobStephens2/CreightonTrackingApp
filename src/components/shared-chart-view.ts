@@ -1,5 +1,5 @@
 import { renderStamp } from './stamp';
-import { displayDate, daysBetween } from '../utils/date-utils';
+import { addDays, displayDate, daysBetween } from '../utils/date-utils';
 import type { Observation, Cycle } from '../db/models';
 
 const CHART_COLUMNS = 35;
@@ -160,10 +160,11 @@ export function renderSharedChartView(container: HTMLElement, data: SharedData):
         td.className = 'chart-empty';
       } else {
         const obs = obsByDay.get(dayNum);
+        const dateStr = addDays(cycle.startDate, dayNum - 1);
 
         if (obs) {
           const stampEl = renderStamp(obs, {
-            showDay: dayNum,
+            showDate: dateStr,
             showCode: true,
           });
           td.appendChild(stampEl);
@@ -172,7 +173,7 @@ export function renderSharedChartView(container: HTMLElement, data: SharedData):
           emptyStamp.className = 'stamp';
           const dayLabel = document.createElement('span');
           dayLabel.className = 'stamp-day';
-          dayLabel.textContent = String(dayNum);
+          dayLabel.textContent = displayDate(dateStr);
           emptyStamp.appendChild(dayLabel);
           const circle = document.createElement('div');
           circle.className = 'stamp-circle';

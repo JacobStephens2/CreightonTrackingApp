@@ -142,7 +142,7 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
 
         if (obs) {
           const stampEl = renderStamp(obs, {
-            showDay: dayNum,
+            showDate: dateStr,
             showCode: true,
             onClick: () => {
               showObservationForm(dateStr, obs, () => renderChartView(container));
@@ -155,7 +155,7 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
           emptyStamp.className = 'stamp';
           const dayLabel = document.createElement('span');
           dayLabel.className = 'stamp-day';
-          dayLabel.textContent = String(dayNum);
+          dayLabel.textContent = displayDate(dateStr);
           emptyStamp.appendChild(dayLabel);
           const circle = document.createElement('div');
           circle.className = 'stamp-circle';
@@ -307,7 +307,7 @@ function renderSampleChart(container: HTMLElement): void {
 
         if (obs) {
           const stampEl = renderStamp(obs, {
-            showDay: dayNum,
+            showDate: addDays(cycle.startDate, dayNum - 1),
             showCode: true,
           });
           td.appendChild(stampEl);

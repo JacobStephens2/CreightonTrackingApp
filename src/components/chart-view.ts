@@ -2,7 +2,7 @@ import { cycleService } from '../services/cycle-service';
 import { observationService } from '../services/observation-service';
 import { renderStamp } from './stamp';
 import { showObservationForm } from './observation-form';
-import { displayDate, addDays, daysBetween } from '../utils/date-utils';
+import { displayDate, addDays, daysBetween, today } from '../utils/date-utils';
 import { generateSampleData } from '../utils/sample-data';
 import type { Observation } from '../db/models';
 
@@ -131,6 +131,12 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
         ? daysBetween(cycle.startDate, observations[observations.length - 1].date) + 1
         : 1;
 
+    // For active cycles, extend clickable range up to today so users can
+    // fill in missed days between their last observation and now.
+    const lastClickableDay = cycle.endDate
+      ? totalDays
+      : Math.max(totalDays, daysBetween(cycle.startDate, today()) + 1);
+
     for (let dayNum = 1; dayNum <= CHART_COLUMNS; dayNum++) {
       const td = document.createElement('td');
 
@@ -149,7 +155,7 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
             },
           });
           td.appendChild(stampEl);
-        } else if (dayNum <= totalDays) {
+        } else if (dayNum <= lastClickableDay) {
           // Empty day within cycle - clickable to add
           const emptyStamp = document.createElement('div');
           emptyStamp.className = 'stamp';

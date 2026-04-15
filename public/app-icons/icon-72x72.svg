@@ -1,23 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8d6466"/>
-      <stop offset="100%" stop-color="#6b4747"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate(-35)">
+      <stop offset="0%" stop-color="#7b5556"/>
+      <stop offset="100%" stop-color="#f7c5c5"/>
     </linearGradient>
-    <radialGradient id="glow" cx="30%" cy="25%" r="75%">
-      <stop offset="0%" stop-color="#f7c5c5" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#f7c5c5" stop-opacity="0"/>
-    </radialGradient>
   </defs>
-  <rect width="72" height="72" rx="14" fill="url(#bg)"/>
-  <circle cx="20.160000000000004" cy="15.84" r="24.48" fill="url(#glow)" opacity="0.55"/>
-  <circle cx="36" cy="36" r="21.599999999999998" fill="#fff7f6" opacity="0.14"/>
-  <circle cx="53.28" cy="21.599999999999998" r="12.24" fill="#f7c5c5" opacity="0.22"/>
-  <path d="M 48.96 19.584
-           A 17.28 17.28 0 1 0 48.96 52.416"
-        fill="none"
-        stroke="#fff7f6"
-        stroke-width="6.12"
-        stroke-linecap="round"/>
-  <circle cx="51.552" cy="24.768" r="4.32" fill="#daf8e8"/>
+  <rect width="72" height="72" rx="16" fill="url(#bg)"/>
+  <g transform="translate(13.5, 13.5) scale(1.875)" fill="#fff7f6">
+    <path d="M12 2c3.13 0 5.87 1.7 7.35 4.23.32.55.13 1.25-.42 1.56-.55.32-1.25.13-1.56-.42A6.25 6.25 0 0012 4.3 6.3 6.3 0 006.24 8.1 6.27 6.27 0 006.7 15c1.14 1.95 3.19 3.18 5.45 3.18 1.95 0 3.8-.93 4.98-2.48.38-.5 1.1-.6 1.61-.21.5.38.6 1.1.21 1.61A8.5 8.5 0 0112.15 20.5c-3.08 0-5.95-1.64-7.5-4.3A8.57 8.57 0 014.02 8.3 8.59 8.59 0 0112 2zm0 4.2c.63 0 1.15.51 1.15 1.15v3.98l2.72 1.63a1.15 1.15 0 11-1.18 1.98l-3.28-1.97a1.15 1.15 0 01-.56-.99V7.35c0-.64.51-1.15 1.15-1.15z"/>
+  </g>
 </svg>

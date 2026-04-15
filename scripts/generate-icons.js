@@ -1,77 +1,125 @@
 import { execFileSync } from 'child_process';
 import { mkdirSync, writeFileSync } from 'fs';
 
-const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-const outputDir = 'public/app-icons';
+// PWA web app icon sizes (regular, rounded square)
+const pwaSizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const pwaDir = 'public/app-icons';
 
+// Android TWA mipmap launcher (regular) sizes per density
+const androidLauncherSizes = {
+  mdpi: 48,
+  hdpi: 72,
+  xhdpi: 96,
+  xxhdpi: 144,
+  xxxhdpi: 192,
+};
+
+// Android TWA mipmap maskable sizes per density (~1.71x launcher to give
+// padding around the safe-zone content under adaptive icon masks).
+const androidMaskableSizes = {
+  mdpi: 82,
+  hdpi: 123,
+  xhdpi: 164,
+  xxhdpi: 246,
+  xxxhdpi: 328,
+};
+
+const androidResDir = 'android-twa/app/src/main/res';
+
+/**
+ * Build the icon SVG. Mirrors public/favicon.svg (burgundy → pink gradient
+ * background with the white clock icon used in the app header). The
+ * `maskable` variant drops the rounded corners and shrinks the icon so the
+ * recognizable content sits well inside the Android adaptive-icon safe zone
+ * (center ~80%).
+ */
 function generateSVG(size, { maskable = false } = {}) {
-  const radius = maskable ? 0 : Math.round(size * 0.2);
-  const center = size / 2;
-  const markRadius = size * (maskable ? 0.25 : 0.24);
-  const stroke = size * (maskable ? 0.09 : 0.085);
-  const dotRadius = size * 0.06;
-  const accentRadius = size * 0.17;
-  const accentX = size * 0.74;
-  const accentY = size * 0.3;
+  const radius = maskable ? 0 : Math.round(size * (14 / 64));
+
+  // The header clock path is authored in a 24-unit viewBox. In the favicon it
+  // is placed at translate(12,12) scale(1.667) inside a 64-unit canvas, which
+  // yields a 40-unit icon centered in the 64-unit canvas (≈62.5%). For
+  // maskable, shrink to ~52% of the canvas so it sits inside the safe zone.
+  const iconRatio = maskable ? 0.52 : 0.625;
+  const iconSize = size * iconRatio;
+  const iconScale = iconSize / 24;
+  const iconOffset = (size - iconSize) / 2;
+
+  const clockPath =
+    'M12 2c3.13 0 5.87 1.7 7.35 4.23.32.55.13 1.25-.42 1.56-.55.32-1.25.13-1.56-.42A6.25 6.25 0 0012 4.3 6.3 6.3 0 006.24 8.1 6.27 6.27 0 006.7 15c1.14 1.95 3.19 3.18 5.45 3.18 1.95 0 3.8-.93 4.98-2.48.38-.5 1.1-.6 1.61-.21.5.38.6 1.1.21 1.61A8.5 8.5 0 0112.15 20.5c-3.08 0-5.95-1.64-7.5-4.3A8.57 8.57 0 014.02 8.3 8.59 8.59 0 0112 2zm0 4.2c.63 0 1.15.51 1.15 1.15v3.98l2.72 1.63a1.15 1.15 0 11-1.18 1.98l-3.28-1.97a1.15 1.15 0 01-.56-.99V7.35c0-.64.51-1.15 1.15-1.15z';
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8d6466"/>
-      <stop offset="100%" stop-color="#6b4747"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate(-35)">
+      <stop offset="0%" stop-color="#7b5556"/>
+      <stop offset="100%" stop-color="#f7c5c5"/>
     </linearGradient>
-    <radialGradient id="glow" cx="30%" cy="25%" r="75%">
-      <stop offset="0%" stop-color="#f7c5c5" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#f7c5c5" stop-opacity="0"/>
-    </radialGradient>
   </defs>
   <rect width="${size}" height="${size}" rx="${radius}" fill="url(#bg)"/>
-  <circle cx="${size * 0.28}" cy="${size * 0.22}" r="${size * 0.34}" fill="url(#glow)" opacity="0.55"/>
-  <circle cx="${center}" cy="${center}" r="${size * 0.3}" fill="#fff7f6" opacity="0.14"/>
-  <circle cx="${accentX}" cy="${accentY}" r="${accentRadius}" fill="#f7c5c5" opacity="0.22"/>
-  <path d="M ${center + markRadius * 0.75} ${center - markRadius * 0.95}
-           A ${markRadius} ${markRadius} 0 1 0 ${center + markRadius * 0.75} ${center + markRadius * 0.95}"
-        fill="none"
-        stroke="#fff7f6"
-        stroke-width="${stroke}"
-        stroke-linecap="round"/>
-  <circle cx="${center + markRadius * 0.9}" cy="${center - markRadius * 0.65}" r="${dotRadius}" fill="#daf8e8"/>
+  <g transform="translate(${iconOffset}, ${iconOffset}) scale(${iconScale})" fill="#fff7f6">
+    <path d="${clockPath}"/>
+  </g>
 </svg>`;
 }
 
 function writeSVG(path, svg) {
-  writeFileSync(path, svg);
+  // Trailing newline so re-runs don't churn POSIX line endings.
+  writeFileSync(path, svg.endsWith('\n') ? svg : svg + '\n');
   console.log(`Generated ${path}`);
 }
 
 function writePNG(svgPath, pngPath, size) {
-  execFileSync('convert', [
-    '-background',
-    'none',
-    '-resize',
-    `${size}x${size}`,
-    svgPath,
+  // rsvg-convert preserves SVG geometry better than ImageMagick's convert.
+  execFileSync('rsvg-convert', [
+    '-w',
+    String(size),
+    '-h',
+    String(size),
+    '-o',
     pngPath,
+    svgPath,
   ]);
   console.log(`Generated ${pngPath}`);
 }
 
-mkdirSync(outputDir, { recursive: true });
+mkdirSync(pwaDir, { recursive: true });
 
-for (const size of sizes) {
-  const svgPath = `${outputDir}/icon-${size}x${size}.svg`;
-  const pngPath = `${outputDir}/icon-${size}x${size}.png`;
-  const svg = generateSVG(size);
-  writeSVG(svgPath, svg);
+// PWA icons (regular)
+for (const size of pwaSizes) {
+  const svgPath = `${pwaDir}/icon-${size}x${size}.svg`;
+  const pngPath = `${pwaDir}/icon-${size}x${size}.png`;
+  writeSVG(svgPath, generateSVG(size));
   writePNG(svgPath, pngPath, size);
 }
 
-const maskableSvgPath = `${outputDir}/maskable-icon-512x512.svg`;
-const maskablePngPath = `${outputDir}/maskable-icon-512x512.png`;
-writeSVG(maskableSvgPath, generateSVG(512, { maskable: true }));
-writePNG(maskableSvgPath, maskablePngPath, 512);
+// PWA maskable icon (512)
+{
+  const svgPath = `${pwaDir}/maskable-icon-512x512.svg`;
+  const pngPath = `${pwaDir}/maskable-icon-512x512.png`;
+  writeSVG(svgPath, generateSVG(512, { maskable: true }));
+  writePNG(svgPath, pngPath, 512);
+}
 
-const faviconSvgPath = 'public/favicon.svg';
-writeSVG(faviconSvgPath, generateSVG(64));
+// Favicon (the source-of-truth visual)
+writeSVG('public/favicon.svg', generateSVG(64));
 
-console.log('Updated app icons and favicon.');
+// Android TWA launcher icons. We render PNG-only here; the SVG is just
+// scratch input for rsvg-convert and immediately discarded.
+const tmpDir = '.icon-tmp';
+mkdirSync(tmpDir, { recursive: true });
+
+for (const [density, size] of Object.entries(androidLauncherSizes)) {
+  const svgPath = `${tmpDir}/launcher-${size}.svg`;
+  const pngPath = `${androidResDir}/mipmap-${density}/ic_launcher.png`;
+  writeSVG(svgPath, generateSVG(size));
+  writePNG(svgPath, pngPath, size);
+}
+
+for (const [density, size] of Object.entries(androidMaskableSizes)) {
+  const svgPath = `${tmpDir}/maskable-${size}.svg`;
+  const pngPath = `${androidResDir}/mipmap-${density}/ic_maskable.png`;
+  writeSVG(svgPath, generateSVG(size, { maskable: true }));
+  writePNG(svgPath, pngPath, size);
+}
+
+console.log('Updated PWA icons, favicon, and Android launcher icons.');

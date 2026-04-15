@@ -63,6 +63,18 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
   }
   container.appendChild(legend);
 
+  // Toolbar (print, export)
+  const toolbar = document.createElement('div');
+  toolbar.className = 'chart-toolbar';
+  const printBtn = document.createElement('button');
+  printBtn.type = 'button';
+  printBtn.className = 'chart-toolbar-btn';
+  printBtn.textContent = 'Print / Save PDF';
+  printBtn.setAttribute('aria-label', 'Print chart or save as PDF');
+  printBtn.addEventListener('click', () => window.print());
+  toolbar.appendChild(printBtn);
+  container.appendChild(toolbar);
+
   // Chart table
   const wrapper = document.createElement('div');
   wrapper.className = 'chart-container';

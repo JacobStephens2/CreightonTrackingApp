@@ -24,6 +24,16 @@ const androidMaskableSizes = {
   xxxhdpi: 328,
 };
 
+// Android TWA splash screen icon sizes per density (Bubblewrap default).
+// The image is centered on the TWA's splash background (#FAFAFA).
+const androidSplashSizes = {
+  mdpi: 300,
+  hdpi: 450,
+  xhdpi: 600,
+  xxhdpi: 900,
+  xxxhdpi: 1200,
+};
+
 const androidResDir = 'android-twa/app/src/main/res';
 
 /**
@@ -122,4 +132,14 @@ for (const [density, size] of Object.entries(androidMaskableSizes)) {
   writePNG(svgPath, pngPath, size);
 }
 
-console.log('Updated PWA icons, favicon, and Android launcher icons.');
+// TWA splash screen — Bubblewrap centers this image on the splash
+// background. We render the full rounded-corner launcher icon so the splash
+// looks like the app icon zoomed up, not a raw white clock on #FAFAFA.
+for (const [density, size] of Object.entries(androidSplashSizes)) {
+  const svgPath = `${tmpDir}/splash-${size}.svg`;
+  const pngPath = `${androidResDir}/drawable-${density}/splash.png`;
+  writeSVG(svgPath, generateSVG(size));
+  writePNG(svgPath, pngPath, size);
+}
+
+console.log('Updated PWA icons, favicon, Android launcher icons, and splash screen.');

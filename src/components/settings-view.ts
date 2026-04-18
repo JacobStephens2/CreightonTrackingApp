@@ -182,6 +182,14 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     passwordInput.setAttribute('aria-label', 'Password');
     form.appendChild(passwordInput);
 
+    const confirmField = document.createElement('div');
+    const confirmInput = document.createElement('input');
+    confirmInput.type = 'password';
+    confirmInput.placeholder = 'Confirm password';
+    confirmInput.autocomplete = 'new-password';
+    confirmInput.setAttribute('aria-label', 'Confirm password');
+    confirmField.appendChild(confirmInput);
+
     const errorMsg = document.createElement('p');
     errorMsg.style.cssText = 'font-size:0.8125rem;color:#d32f2f;margin:0;display:none';
     form.appendChild(errorMsg);
@@ -196,6 +204,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     loginBtn.addEventListener('click', async () => {
       createAccountMode = false;
       nameField.remove();
+      confirmField.remove();
       errorMsg.style.display = 'none';
       errorMsg.style.color = '#d32f2f';
       loginBtn.disabled = true;
@@ -229,6 +238,8 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       if (!createAccountMode) {
         createAccountMode = true;
         form.insertBefore(nameField, emailInput);
+        passwordInput.insertAdjacentElement('afterend', confirmField);
+        passwordInput.autocomplete = 'new-password';
         errorMsg.style.display = 'none';
         requestAnimationFrame(() => nameInput.focus());
         return;
@@ -238,6 +249,11 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
       errorMsg.style.color = '#d32f2f';
       if (!nameInput.value.trim()) {
         errorMsg.textContent = 'Enter your first name to create an account';
+        errorMsg.style.display = 'block';
+        return;
+      }
+      if (passwordInput.value !== confirmInput.value) {
+        errorMsg.textContent = 'Passwords do not match';
         errorMsg.style.display = 'block';
         return;
       }

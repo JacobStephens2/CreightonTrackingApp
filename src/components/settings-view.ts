@@ -1,3 +1,4 @@
+import { toPng } from 'html-to-image';
 import { db } from '../db/database';
 import { exportService } from '../services/export-service';
 import { authService } from '../services/auth-service';
@@ -5,6 +6,8 @@ import { syncService } from '../services/sync-service';
 import { shareService } from '../services/share-service';
 import { showToast } from '../utils/toast';
 import { applyTheme } from '../main';
+import { renderChartView } from './chart-view';
+import { today } from '../utils/date-utils';
 
 let renderGeneration = 0;
 
@@ -464,6 +467,78 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
 
   const btnGroup = document.createElement('div');
   btnGroup.style.cssText = 'display:flex;flex-direction:column;gap:8px';
+
+  // Save Chart Image — renders chart off-screen and exports as PNG.
+  // Uses navigator.share() for Capacitor/WebView compatibility, falls
+  // back to <a download> for browsers.
+  const saveImageBtn = document.createElement('button');
+  saveImageBtn.className = 'btn btn-secondary btn-block';
+  saveImageBtn.textContent = 'Save Chart Image';
+  saveImageBtn.addEventListener('click', async () => {
+    saveImageBtn.disabled = true;
+    saveImageBtn.classList.add('btn-loading');
+    try {
+      // Render chart into a hidden off-screen container
+      const offscreen = document.createElement('div');
+      offscreen.style.cssText = 'position:absolute;left:-9999px;top:0;width:2000px';
+      document.body.appendChild(offscreen);
+      await renderChartView(offscreen);
+      const chartEl = offscreen.querySelector('.chart-container') as HTMLElement | null;
+      if (!chartEl) throw new Error('No chart to export');
+
+      const dataUrl = await toPng(chartEl, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+      });
+      document.body.removeChild(offscreen);
+
+      const filename = `creighton-chart-${today()}.png`;
+
+      // Try Web Share API (works in Capacitor WebView and mobile browsers)
+      if (navigator.share && navigator.canShare) {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file] });
+          showToast('Chart shared', 'success');
+          return;
+        }
+      }
+
+      // Fallback: download via anchor tag (works in desktop browsers)
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename;
+      link.click();
+      showToast('Chart image saved', 'success');
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Failed to export chart image', err);
+        showToast('Could not save image', 'error');
+      }
+    } finally {
+      saveImageBtn.disabled = false;
+      saveImageBtn.classList.remove('btn-loading');
+    }
+  });
+  btnGroup.appendChild(saveImageBtn);
+
+  // Print Chart — navigates to chart view then triggers the browser print dialog
+  const printBtn = document.createElement('button');
+  printBtn.className = 'btn btn-secondary btn-block';
+  printBtn.textContent = 'Print Chart';
+  printBtn.addEventListener('click', () => {
+    window.location.hash = '/chart';
+    // Wait for chart to render before printing
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+  });
+  btnGroup.appendChild(printBtn);
 
   // Export JSON
   const exportJsonBtn = document.createElement('button');

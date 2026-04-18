@@ -1,4 +1,3 @@
-import { toPng } from 'html-to-image';
 import { cycleService } from '../services/cycle-service';
 import { observationService } from '../services/observation-service';
 import { renderStamp } from './stamp';
@@ -63,51 +62,6 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
     legend.appendChild(li);
   }
   container.appendChild(legend);
-
-  // Toolbar (print, export)
-  const toolbar = document.createElement('div');
-  toolbar.className = 'chart-toolbar';
-  const printBtn = document.createElement('button');
-  printBtn.type = 'button';
-  printBtn.className = 'chart-toolbar-btn';
-  printBtn.textContent = 'Print / Save PDF';
-  printBtn.setAttribute('aria-label', 'Print chart or save as PDF');
-  printBtn.addEventListener('click', () => window.print());
-  toolbar.appendChild(printBtn);
-
-  const imageBtn = document.createElement('button');
-  imageBtn.type = 'button';
-  imageBtn.className = 'chart-toolbar-btn';
-  imageBtn.textContent = 'Save Image';
-  imageBtn.setAttribute('aria-label', 'Save chart as PNG image');
-  imageBtn.addEventListener('click', async () => {
-    const wrapperEl = container.querySelector('.chart-container') as HTMLElement | null;
-    if (!wrapperEl) return;
-    const originalText = imageBtn.textContent;
-    imageBtn.disabled = true;
-    imageBtn.textContent = 'Saving…';
-    try {
-      // Render at 2x for crisper output and use a white background so
-      // the image looks the same on light/dark themes.
-      const dataUrl = await toPng(wrapperEl, {
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        cacheBust: true,
-      });
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `creighton-chart-${today()}.png`;
-      link.click();
-    } catch (err) {
-      console.error('Failed to export chart image', err);
-      alert('Could not save image. Please try again.');
-    } finally {
-      imageBtn.disabled = false;
-      imageBtn.textContent = originalText;
-    }
-  });
-  toolbar.appendChild(imageBtn);
-  container.appendChild(toolbar);
 
   // Chart table
   const wrapper = document.createElement('div');

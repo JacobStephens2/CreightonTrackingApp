@@ -183,7 +183,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     passwordInput.placeholder = 'Password (min 8 characters)';
     passwordInput.autocomplete = 'current-password';
     passwordInput.setAttribute('aria-label', 'Password');
-    form.appendChild(passwordInput);
+    form.appendChild(wrapPasswordToggle(passwordInput));
 
     const confirmField = document.createElement('div');
     const confirmInput = document.createElement('input');
@@ -191,7 +191,7 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
     confirmInput.placeholder = 'Confirm password';
     confirmInput.autocomplete = 'new-password';
     confirmInput.setAttribute('aria-label', 'Confirm password');
-    confirmField.appendChild(confirmInput);
+    confirmField.appendChild(wrapPasswordToggle(confirmInput));
 
     const errorMsg = document.createElement('p');
     errorMsg.style.cssText = 'font-size:0.8125rem;color:#d32f2f;margin:0;display:none';
@@ -661,4 +661,35 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   wrapper.appendChild(version);
 
   container.appendChild(wrapper);
+}
+
+const EYE_OPEN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_CLOSED = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+/** Wrap a password input in a container with a show/hide toggle button. */
+function wrapPasswordToggle(input: HTMLInputElement): HTMLElement {
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:relative';
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.innerHTML = EYE_CLOSED;
+  toggle.setAttribute('aria-label', 'Show password');
+  toggle.style.cssText =
+    'position:absolute;right:8px;top:50%;transform:translateY(-50%);' +
+    'background:none;border:none;padding:4px;cursor:pointer;color:var(--text-secondary);' +
+    'display:flex;align-items:center;justify-content:center';
+
+  toggle.addEventListener('click', () => {
+    const visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+    toggle.innerHTML = visible ? EYE_CLOSED : EYE_OPEN;
+    toggle.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+    input.focus();
+  });
+
+  input.style.paddingRight = '36px';
+  wrapper.appendChild(input);
+  wrapper.appendChild(toggle);
+  return wrapper;
 }

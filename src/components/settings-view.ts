@@ -560,6 +560,11 @@ export async function renderSettingsView(container: HTMLElement): Promise<void> 
   });
   btnGroup.appendChild(exportCsvBtn);
 
+  const downloadHint = document.createElement('p');
+  downloadHint.style.cssText = 'font-size:0.75rem;color:var(--text-secondary);margin:-4px 0 4px;padding:0 4px';
+  downloadHint.textContent = 'Exported files save to your Downloads folder.';
+  btnGroup.appendChild(downloadHint);
+
   // Import JSON
   const importBtn = document.createElement('button');
   importBtn.className = 'btn btn-secondary btn-block';

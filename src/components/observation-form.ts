@@ -4,6 +4,7 @@ import { displayDate, dayOfWeek } from '../utils/date-utils';
 import { determineStamp } from '../utils/stamp-logic';
 import { renderStamp } from './stamp';
 import { observationService } from '../services/observation-service';
+import { cycleService } from '../services/cycle-service';
 
 interface FormState {
   date: string;
@@ -33,6 +34,8 @@ export function showObservationForm(
     intercourse: existing?.intercourse ?? false,
     notes: existing?.notes ?? '',
   };
+
+  let stampContext: { peakDay?: string; postPeakCount?: number; inFertileWindow?: boolean } = {};
 
   // Create modal overlay
   const overlay = document.createElement('div');
@@ -78,7 +81,7 @@ export function showObservationForm(
       dateLbl.appendChild(dateInput);
       dateInput.addEventListener('change', () => {
         state.date = dateInput.value;
-        render();
+        refreshStampContext();
       });
       dateEl.appendChild(dateLbl);
     }
@@ -103,7 +106,7 @@ export function showObservationForm(
         mucusStretch: state.mucusStretch,
         mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
         isPeakDay: state.isPeakDay,
-      }),
+      }, stampContext),
     };
     preview.appendChild(renderStamp(previewObs, { large: true, showCode: false }));
     const codeEl = document.createElement('span');
@@ -318,7 +321,13 @@ export function showObservationForm(
     modal.appendChild(form);
   }
 
+  async function refreshStampContext() {
+    stampContext = await cycleService.getStampContext(state.date);
+    render();
+  }
+
   render();
+  refreshStampContext();
 
   overlay.appendChild(modal);
   overlay.addEventListener('click', (e) => {

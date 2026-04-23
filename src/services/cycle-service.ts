@@ -1,7 +1,7 @@
 import { db } from '../db/database';
 import type { Cycle, Observation } from '../db/models';
 import { daysBetween } from '../utils/date-utils';
-import { hasPeakTypeMucus } from '../utils/stamp-logic';
+import { determineStamp, hasPeakTypeMucus } from '../utils/stamp-logic';
 
 export const cycleService = {
   /** Get all cycles ordered by start date */
@@ -108,6 +108,9 @@ export const cycleService = {
 
     // Detect peak days for each cycle
     await this.detectPeakDays();
+
+    // Recompute stamps for every observation using the fresh cycle/peak state
+    await this.recomputeStamps();
   },
 
   /** Assign observations within a date range to a cycle */
@@ -129,7 +132,12 @@ export const cycleService = {
     }
   },
 
-  /** Auto-detect peak days: the last day of peak-type mucus in each cycle */
+  /** Auto-detect peak days. Rules:
+   *   1. If any observation in the cycle has isPeakDay=true, that date wins.
+   *   2. Otherwise, peak is the last peak-type mucus day that is followed by
+   *      at least one non-peak-type observation within the same cycle (the
+   *      Creighton "change" criterion). If the last peak-type day has no
+   *      non-peak follow-up, peak isn't established yet and is cleared. */
   async detectPeakDays(): Promise<void> {
     const cycles = await db.cycles.toArray();
     for (const cycle of cycles) {
@@ -138,15 +146,45 @@ export const cycleService = {
         .equals(cycle.id!)
         .sortBy('date');
 
-      let lastPeakTypeDate: string | null = null;
-      for (const o of obs) {
-        if (hasPeakTypeMucus(o.mucusStretch, o.mucusCharacteristics)) {
-          lastPeakTypeDate = o.date;
+      const userPeak = obs.find(o => o.isPeakDay);
+      if (userPeak) {
+        await db.cycles.update(cycle.id!, { peakDay: userPeak.date });
+        continue;
+      }
+
+      let lastPeakTypeIdx = -1;
+      for (let i = 0; i < obs.length; i++) {
+        if (hasPeakTypeMucus(obs[i].mucusStretch, obs[i].mucusCharacteristics)) {
+          lastPeakTypeIdx = i;
         }
       }
 
-      if (lastPeakTypeDate) {
-        await db.cycles.update(cycle.id!, { peakDay: lastPeakTypeDate });
+      const confirmed =
+        lastPeakTypeIdx >= 0 &&
+        lastPeakTypeIdx < obs.length - 1 &&
+        !hasPeakTypeMucus(
+          obs[lastPeakTypeIdx + 1].mucusStretch,
+          obs[lastPeakTypeIdx + 1].mucusCharacteristics
+        );
+
+      if (confirmed) {
+        await db.cycles.update(cycle.id!, { peakDay: obs[lastPeakTypeIdx].date });
+      } else if (cycle.peakDay) {
+        await db.cycles.where('id').equals(cycle.id!).modify(c => { delete c.peakDay; });
+      }
+    }
+  },
+
+  /** Recompute stamps on every observation using the current cycle/peak state.
+   *  Called at the end of evaluateCycles so stamps never go stale when cycle
+   *  boundaries or peak days shift. */
+  async recomputeStamps(): Promise<void> {
+    const allObs = await db.observations.toArray();
+    for (const o of allObs) {
+      const context = await this.getStampContext(o.date);
+      const newStamp = determineStamp(o, context);
+      if (newStamp !== o.stamp) {
+        await db.observations.update(o.id!, { stamp: newStamp });
       }
     }
   },

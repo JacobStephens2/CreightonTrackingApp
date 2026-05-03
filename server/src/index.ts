@@ -13,6 +13,7 @@ initSchema();
 const app = express();
 const port = parseInt(process.env.PORT || '3456');
 
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '5mb' }));

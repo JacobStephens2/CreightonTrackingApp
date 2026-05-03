@@ -89,6 +89,8 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
   const tbody = document.createElement('tbody');
   const sortedCycles = [...cycles].reverse();
 
+  let mostRecentCell: HTMLTableCellElement | null = null;
+
   for (let i = 0; i < sortedCycles.length; i++) {
     const cycle = sortedCycles[i];
     const cycleNumber = cycles.length - i;
@@ -155,6 +157,9 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
             },
           });
           td.appendChild(stampEl);
+          if (i === 0) {
+            mostRecentCell = td;
+          }
         } else if (dayNum <= lastClickableDay) {
           // Empty day within cycle - clickable to add
           const emptyStamp = document.createElement('div');
@@ -193,6 +198,14 @@ export async function renderChartView(container: HTMLElement): Promise<void> {
   table.appendChild(tbody);
   wrapper.appendChild(table);
   container.appendChild(wrapper);
+
+  if (mostRecentCell) {
+    const cell = mostRecentCell;
+    requestAnimationFrame(() => {
+      const target = cell.offsetLeft + cell.offsetWidth - wrapper.clientWidth + 20;
+      wrapper.scrollLeft = Math.max(0, target);
+    });
+  }
 }
 
 function renderSampleChart(container: HTMLElement): void {

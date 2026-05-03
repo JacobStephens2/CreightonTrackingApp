@@ -197,6 +197,7 @@ export const cycleService = {
     peakDay?: string;
     postPeakCount?: number;
     inFertileWindow?: boolean;
+    pastPostPeakWindow?: boolean;
   }> {
     // Find which cycle this date belongs to
     const obs = await db.observations.where('date').equals(date).first();
@@ -215,6 +216,11 @@ export const cycleService = {
         peakDay: cycle.peakDay,
         postPeakCount: daysAfterPeak,
       };
+    }
+
+    // Past the post-peak count window — no longer considered fertile
+    if (daysAfterPeak > 3) {
+      return { peakDay: cycle.peakDay, pastPostPeakWindow: true };
     }
 
     // Check if in fertile window (mucus has started but peak not yet passed)

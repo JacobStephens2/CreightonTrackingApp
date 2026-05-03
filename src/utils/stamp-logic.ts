@@ -3,7 +3,7 @@ import type { Observation, StampType, MucusStretchCode, MucusCharacteristic } fr
 /** Determine the stamp type for an observation based on Creighton rules */
 export function determineStamp(
   obs: Observation,
-  context?: { peakDay?: string; postPeakCount?: number; inFertileWindow?: boolean }
+  context?: { peakDay?: string; postPeakCount?: number; inFertileWindow?: boolean; pastPostPeakWindow?: boolean }
 ): StampType {
   // Manual override takes precedence
   if (obs.stampOverride) return obs.stampOverride;
@@ -35,8 +35,12 @@ export function determineStamp(
     return 'red';
   }
 
-  // Mucus present — always potentially fertile
+  // Mucus present
   if (hasMucus(obs)) {
+    // Past the 3 post-peak count days — mucus is no longer considered fertile
+    if (context?.pastPostPeakWindow) {
+      return 'white';
+    }
     return 'whiteBaby';
   }
 

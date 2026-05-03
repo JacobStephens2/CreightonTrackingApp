@@ -24,6 +24,7 @@ export function showObservationForm(
   existing?: Observation,
   onSave?: () => void
 ): void {
+  let current: Observation | undefined = existing;
   const state: FormState = {
     date,
     bleeding: existing?.bleeding,
@@ -37,7 +38,8 @@ export function showObservationForm(
     notes: existing?.notes ?? '',
   };
 
-  let stampContext: { peakDay?: string; postPeakCount?: number; inFertileWindow?: boolean } = {};
+  let stampContext: { peakDay?: string; postPeakCount?: number; inFertileWindow?: boolean; pastPostPeakWindow?: boolean } = {};
+  let neighbors: { prev?: string; next?: string } = {};
 
   // Create modal overlay
   const overlay = document.createElement('div');
@@ -55,21 +57,51 @@ export function showObservationForm(
     // Header
     const header = document.createElement('div');
     header.className = 'obs-form-header';
+
+    const titleGroup = document.createElement('div');
+    titleGroup.className = 'obs-form-title-group';
+
+    if (current) {
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'obs-form-nav';
+      prevBtn.innerHTML = '&larr;';
+      prevBtn.setAttribute('aria-label', 'Previous observation');
+      prevBtn.disabled = !neighbors.prev;
+      if (neighbors.prev) {
+        prevBtn.addEventListener('click', () => loadObservation(neighbors.prev!));
+      }
+      titleGroup.appendChild(prevBtn);
+    }
+
     const title = document.createElement('h2');
-    title.textContent = existing ? 'Edit Observation' : 'New Observation';
+    title.textContent = current ? 'Edit Observation' : 'New Observation';
+    titleGroup.appendChild(title);
+
+    if (current) {
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'obs-form-nav';
+      nextBtn.innerHTML = '&rarr;';
+      nextBtn.setAttribute('aria-label', 'Next observation');
+      nextBtn.disabled = !neighbors.next;
+      if (neighbors.next) {
+        nextBtn.addEventListener('click', () => loadObservation(neighbors.next!));
+      }
+      titleGroup.appendChild(nextBtn);
+    }
+
     const closeBtn = document.createElement('button');
     closeBtn.className = 'obs-form-close';
     closeBtn.innerHTML = '&times;';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.addEventListener('click', () => overlay.remove());
-    header.appendChild(title);
+    header.appendChild(titleGroup);
     header.appendChild(closeBtn);
     modal.appendChild(header);
 
     // Date
     const dateEl = document.createElement('div');
     dateEl.className = 'obs-form-date';
-    if (existing) {
+    if (current) {
       dateEl.textContent = `${dayOfWeek(state.date)}, ${displayDate(state.date)} ${state.date.slice(0, 4)}`;
     } else {
       const dateLbl = document.createElement('label');
@@ -289,12 +321,12 @@ export function showObservationForm(
     const actions = document.createElement('div');
     actions.className = 'obs-form-actions';
 
-    if (existing) {
+    if (current) {
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn btn-danger';
       deleteBtn.textContent = 'Delete';
       deleteBtn.addEventListener('click', async () => {
-        await observationService.delete(date);
+        await observationService.delete(state.date);
         overlay.remove();
         onSave?.();
       });
@@ -306,7 +338,7 @@ export function showObservationForm(
     saveBtn.textContent = 'Save';
     saveBtn.addEventListener('click', async () => {
       const obs: Observation = {
-        ...(existing ?? {}),
+        ...(current ?? {}),
         date: state.date,
         bleeding: state.bleeding,
         brown: state.brown || undefined,
@@ -342,8 +374,43 @@ export function showObservationForm(
     render();
   }
 
+  async function refreshNeighbors() {
+    const all = await observationService.getAll();
+    const idx = all.findIndex(o => o.date === state.date);
+    if (idx < 0) {
+      neighbors = {};
+    } else {
+      neighbors = {
+        prev: idx > 0 ? all[idx - 1].date : undefined,
+        next: idx < all.length - 1 ? all[idx + 1].date : undefined,
+      };
+    }
+    render();
+  }
+
+  async function loadObservation(date: string) {
+    const obs = await observationService.getByDate(date);
+    if (!obs) return;
+    current = obs;
+    state.date = obs.date;
+    state.bleeding = obs.bleeding;
+    state.brown = obs.brown ?? false;
+    state.mucusStretch = obs.mucusStretch;
+    state.mucusCharacteristics = obs.mucusCharacteristics ? [...obs.mucusCharacteristics] : [];
+    state.frequency = obs.frequency;
+    state.isPeakDay = obs.isPeakDay ?? false;
+    state.isCycleStart = obs.isCycleStart ?? false;
+    state.intercourse = obs.intercourse ?? false;
+    state.notes = obs.notes ?? '';
+    overlay.setAttribute('aria-label', 'Edit Observation');
+    render();
+    refreshStampContext();
+    refreshNeighbors();
+  }
+
   render();
   refreshStampContext();
+  if (current) refreshNeighbors();
 
   overlay.appendChild(modal);
   overlay.addEventListener('click', (e) => {

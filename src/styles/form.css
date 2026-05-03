@@ -19,6 +19,35 @@
   letter-spacing: -0.03em;
 }
 
+.obs-form-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obs-form-nav {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--surface-mid);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.obs-form-nav:active {
+  transform: scale(0.96);
+}
+
+.obs-form-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .obs-form-close {
   width: 40px;
   height: 40px;

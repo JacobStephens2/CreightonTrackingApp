@@ -46,8 +46,11 @@ export const cycleService = {
         ? daysBetween(lastBleedingDate, obs.date)
         : Infinity;
 
-      // New cycle if bleeding after enough non-bleeding evidence
-      if (isBleeding && (consecutiveNonBleeding >= 3 || daysSinceLastBleeding >= 14)) {
+      // Manual override: user-flagged cycle start always forces a boundary
+      const manualStart = obs.isCycleStart === true;
+
+      // New cycle if manually flagged, or bleeding after enough non-bleeding evidence
+      if (manualStart || (isBleeding && (consecutiveNonBleeding >= 3 || daysSinceLastBleeding >= 14))) {
         cycles.push({ startDate: currentCycleStart });
         currentCycleStart = obs.date;
         consecutiveNonBleeding = 0;

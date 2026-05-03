@@ -14,6 +14,7 @@ interface FormState {
   mucusCharacteristics: MucusCharacteristic[];
   frequency?: FrequencyCode;
   isPeakDay: boolean;
+  isCycleStart: boolean;
   intercourse: boolean;
   notes: string;
 }
@@ -31,6 +32,7 @@ export function showObservationForm(
     mucusCharacteristics: existing?.mucusCharacteristics ? [...existing.mucusCharacteristics] : [],
     frequency: existing?.frequency,
     isPeakDay: existing?.isPeakDay ?? false,
+    isCycleStart: existing?.isCycleStart ?? false,
     intercourse: existing?.intercourse ?? false,
     notes: existing?.notes ?? '',
   };
@@ -248,6 +250,19 @@ export function showObservationForm(
     }));
     form.appendChild(peakSection);
 
+    // Cycle start toggle
+    const cycleStartSection = document.createElement('div');
+    cycleStartSection.className = 'peak-toggle';
+    const cycleStartLabel = document.createElement('div');
+    cycleStartLabel.className = 'peak-toggle-label';
+    cycleStartLabel.innerHTML = '<span>First Day of Cycle</span><span>Force this observation to start a new cycle</span>';
+    cycleStartSection.appendChild(cycleStartLabel);
+    cycleStartSection.appendChild(createSwitch(state.isCycleStart, (v) => {
+      state.isCycleStart = v;
+      render();
+    }));
+    form.appendChild(cycleStartSection);
+
     // Intercourse toggle
     const icSection = document.createElement('div');
     icSection.className = 'intercourse-toggle';
@@ -299,6 +314,7 @@ export function showObservationForm(
         mucusCharacteristics: state.mucusCharacteristics.length > 0 ? state.mucusCharacteristics : undefined,
         frequency: state.frequency,
         isPeakDay: state.isPeakDay,
+        isCycleStart: state.isCycleStart || undefined,
         intercourse: state.intercourse,
         notes: state.notes || undefined,
         stamp: determineStamp({

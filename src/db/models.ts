@@ -39,6 +39,7 @@ export interface Observation {
   mucusCharacteristics?: MucusCharacteristic[];
   frequency?: FrequencyCode;
   isPeakDay: boolean;
+  isCycleStart?: boolean; // Manual: force this observation to be the first day of a new cycle
   stampOverride?: StampType; // Manual override
   stamp?: StampType; // Computed
   intercourse?: boolean;

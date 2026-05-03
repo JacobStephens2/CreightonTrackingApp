@@ -37,8 +37,9 @@ export function determineStamp(
 
   // Mucus present
   if (hasMucus(obs)) {
-    // Past the 3 post-peak count days — mucus is no longer considered fertile
-    if (context?.pastPostPeakWindow) {
+    // Past the 3 post-peak count days — non-peak mucus is no longer fertile,
+    // but peak-type mucus (10/K/L) still indicates fertility.
+    if (context?.pastPostPeakWindow && !hasPeakTypeMucus(obs.mucusStretch, obs.mucusCharacteristics)) {
       return 'white';
     }
     return 'whiteBaby';
